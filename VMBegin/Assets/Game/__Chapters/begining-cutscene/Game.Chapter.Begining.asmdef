@@ -1,0 +1,19 @@
+{
+    "name": "Game.Chapter.Begining",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d77b9eb5e22c58d459dd7cd69d574e6f",
+        "GUID:add883c0ca1ab9240af707cc7c8a6486",
+        "GUID:03ba46a298b6c5d43940a53c85896cf6",
+        "GUID:844764cee5daf5c40b643f742c02d0f5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

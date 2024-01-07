@@ -1,0 +1,16 @@
+{
+    "name": "Game.Actors",
+    "rootNamespace": "",
+    "references": [
+        "GUID:add883c0ca1ab9240af707cc7c8a6486"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

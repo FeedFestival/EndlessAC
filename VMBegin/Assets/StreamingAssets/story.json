@@ -1,0 +1,40 @@
+{
+  "decisions": {
+    "chapters": {
+      "begining": {
+        "played_begining_cutscene": "false"
+      }
+    }
+  },
+  "progression": {
+    "currentChapterKey": "begining",
+    "currentQuestKey": "the_stop"
+  },
+  "chapters": {
+    "begining": {
+      "id": 0,
+      "name": "Finding Reason",
+      "synopsis": "You have landed in the earth solar system and are just awaken from stasis and need to find the reason for you being there.",
+      "quests": {
+        "the_stop": {
+          "id": 0,
+          "name": "The Stop",
+          "synopsis": null,
+          "objective": "Sit back and enjoy the cutscene.",
+          "events": {
+            "played_begining_cutscene": "false"
+          }
+        },
+        "reach_infirmary": {
+          "id": 1,
+          "name": "Reach the infirmary",
+          "synopsis": null,
+          "objective": "Make your way through the ship towards the infirmary.",
+          "events": {
+            "reached_the_elevator": "false"
+          }
+        }
+      }
+    }
+  }
+}

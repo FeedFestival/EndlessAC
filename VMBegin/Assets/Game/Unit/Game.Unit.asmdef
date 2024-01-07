@@ -1,0 +1,18 @@
+{
+    "name": "Game.Unit",
+    "rootNamespace": "",
+    "references": [
+        "GUID:add883c0ca1ab9240af707cc7c8a6486",
+        "GUID:560b04d1a97f54a4e82edc0cbbb69285",
+        "GUID:fdd10eed0a9eef94d8120b2227b07a8e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

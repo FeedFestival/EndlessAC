@@ -1,0 +1,16 @@
+{
+    "name": "GameScrypt.JsonData",
+    "rootNamespace": "",
+    "references": [
+        "GUID:953b276d19c2c8a44bd86e723201af9e"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

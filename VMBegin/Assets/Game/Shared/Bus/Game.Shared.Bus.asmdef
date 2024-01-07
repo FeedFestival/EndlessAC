@@ -1,0 +1,18 @@
+{
+    "name": "Game.Shared.Bus",
+    "rootNamespace": "",
+    "references": [
+        "GUID:a7304875636f3274d86ab1dd11a54b3c",
+        "GUID:401fd210807ca404a9e7194b650ec646",
+        "GUID:add883c0ca1ab9240af707cc7c8a6486"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

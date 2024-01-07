@@ -1,0 +1,13 @@
+{
+	"Interactable": {
+		"Door": 1,
+		"Ladder": 2,
+	},
+	"Actor": {
+		"SpaceShip": 1,
+		"Alien": 7,
+	},
+	"Variations": {
+		"None": 0,
+	},
+}

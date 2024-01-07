@@ -10,13 +10,15 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-/VMInception/[Ll]ibrary/
-/VMInception/[Tt]emp/
-/VMInception/[Oo]bj/
-/VMInception/[Bb]uild/
-/VMInception/[Bb]uilds/
-/VMInception/[Ll]ogs/
-/VMInception/[Uu]ser[Ss]ettings/
+/VMBegin/[Ll]ibrary/
+/VMBegin/[Tt]emp/
+/VMBegin/[Oo]bj/
+/VMBegin/[Bb]uild/
+/VMBegin/[Bb]uilds/
+/VMBegin/[Ll]ogs/
+/VMBegin/[Uu]ser[Ss]ettings/
+/VMBegin/[Dd]ist/
+/VMBegin/[Aa]ssets/TextMesh Pro/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
