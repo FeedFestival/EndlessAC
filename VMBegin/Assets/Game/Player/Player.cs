@@ -26,15 +26,6 @@ namespace Game.Player {
             _unitRef = _unitGo.GetComponent<IUnit>();
             _unitGo = null;
 
-            _playerControl = new PlayerControl(_unitRef, _cameraControllerRef, _worldIndicatorManager);
-
-            if (_gameStoryRef) {
-                _gameStory = _gameStoryRef.GetComponent<IGameStory>();
-                _gameStoryRef = null;
-            } else {
-                Debug.LogWarning("There is no GameStory on Player");
-            }
-
             __.GameBus.On(GameEvt.GAME_SCENE_LOADED, (object obj) => {
                 var gameScene = obj as IGameScene;
                 Debug.Log("__.GameBus.On -> GameEvt.GAME_SCENE_LOADED");
@@ -44,7 +35,14 @@ namespace Game.Player {
         }
 
         void Start() {
+            _playerControl = new PlayerControl(_unitRef, _cameraControllerRef, _worldIndicatorManager);
 
+            if (_gameStoryRef) {
+                _gameStory = _gameStoryRef.GetComponent<IGameStory>();
+                _gameStoryRef = null;
+            } else {
+                Debug.LogWarning("There is no GameStory on Player");
+            }
         }
 
         // CONTROL

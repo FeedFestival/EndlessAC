@@ -4,11 +4,12 @@ using UnityEngine;
 namespace Game.Actors {
     public class Alien_Actor : MonoBehaviour, IActor {
 
-        public Animator Animator { get; private set; }
+        public Animator Animator { get => _animatorRef; }
+
+        [SerializeField]
+        private Animator _animatorRef;
 
         void Awake() {
-            Animator = GetComponent<Animator>();
-
 
         }
     }
