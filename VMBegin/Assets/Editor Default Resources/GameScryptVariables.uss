@@ -1,0 +1,14 @@
+:root {
+	--gj-color-grid-light-gray-1: #2b2b2b;
+	--gj-color-grid-light-gray-2: rgba(51, 51, 51, 0.4);
+	--gj-color-grid-light-gray-3: rgba(51, 51, 51, 1);
+
+	--gj-color-window-dark-gray-1: #1D1D1E;
+	--gj-color-window-dark-gray-2: #2B2D2F;
+	--gj-color-window-dark-gray-3: #212325;
+	--gj-color-window-dark-gray-4: #232527;
+	--gj-color-window-dark-gray-5: #252729;
+	--gj-color-window-dark-gray-6: #27292C;
+
+	--gj-metrics-grid-pixels-25: 25;
+}

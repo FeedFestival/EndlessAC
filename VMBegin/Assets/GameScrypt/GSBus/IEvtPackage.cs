@@ -1,10 +1,8 @@
 using System;
 using UniRx;
 
-namespace GameScrypt.Bus
-{
-    public interface IEvtPackage
-    {
+namespace GameScrypt.Bus {
+    public interface IEvtPackage {
         Subject<object> subject { get; set; }
         Subject<bool> subjectBool { get; set; }
         IDisposable disposable { get; set; }

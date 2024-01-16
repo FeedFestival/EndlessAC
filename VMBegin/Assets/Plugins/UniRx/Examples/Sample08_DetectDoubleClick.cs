@@ -1,12 +1,9 @@
 ﻿using System;
 using UnityEngine;
 
-namespace UniRx.Examples
-{
-    public class Sample08_DetectDoubleClick : MonoBehaviour
-    {
-        void Start()
-        {
+namespace UniRx.Examples {
+    public class Sample08_DetectDoubleClick : MonoBehaviour {
+        void Start() {
             // Global event handling is very useful.
             // UniRx can handle there events.
             // Observable.EveryUpdate/EveryFixedUpdate/EveryEndOfFrame

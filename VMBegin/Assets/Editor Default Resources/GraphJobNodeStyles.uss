@@ -1,0 +1,63 @@
+
+/* CONTAINERS */
+
+.gj-node__extensions-container {
+	background-color: var(--gj-color-window-dark-gray-1);
+	padding: 8px;
+}
+
+.gj-node__main-container {
+	background-color: var(--gj-color-window-dark-gray-1);
+}
+
+.gj-node__custom-data-containers {
+	background-color: var(--gj-color-window-dark-gray-3);
+	border-radius: 4px;
+	padding: 8px;
+}
+
+/* INPUTS */
+
+.gj-node__textfield > .unity-text-field__input,
+.gj-node__textfield > .unity-object-field__input,
+.gj-node__textfield > .unity-popup-field__input {
+	background-color: var(--gj-color-window-dark-gray-1);
+	border-color: var(--gj-color-window-dark-gray-6);
+	border-radius: 4px;
+	max-width: 240px;
+	min-width: 160px;
+	padding: 8px;
+}
+
+.gj-node__textfield__hidden > .unity-text-field__input {
+	background-color: transparent;
+	border-color: transparent;
+}
+
+.gj-node__textfield__hidden > .unity-text-field__input:focus {
+	background-color: var(--gj-color-window-dark-gray-1);
+	border-color: var(--gj-color-window-dark-gray-6);
+}
+
+/* ELEMENTS */
+
+TextField {
+	margin-left: 0px;
+}
+
+.gj-node__custom-data-container > Foldout {
+	margin-left: -4px;
+	margin-top: 4px;
+}
+
+.gj-node__custom-data-container > Foldout > TextField {
+	margin-left: -12px;
+	margin-top: 8px;
+}
+
+/* BUILT IN */
+
+.unity-toggle__text {
+	margin-left: 2px;
+}
+

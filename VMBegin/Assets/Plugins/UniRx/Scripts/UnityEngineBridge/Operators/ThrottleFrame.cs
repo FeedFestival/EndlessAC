@@ -6,28 +6,23 @@ using UnityObservable = UniRx.ObservableUnity;
 using UnityObservable = UniRx.Observable;
 #endif
 
-namespace UniRx.Operators
-{
-    internal class ThrottleFrameObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class ThrottleFrameObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly int frameCount;
         readonly FrameCountType frameCountType;
 
-        public ThrottleFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+        public ThrottleFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.frameCount = frameCount;
             this.frameCountType = frameCountType;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             return new ThrottleFrame(this, observer, cancel).Run();
         }
 
-        class ThrottleFrame : OperatorObserverBase<T, T>
-        {
+        class ThrottleFrame : OperatorObserverBase<T, T> {
             readonly ThrottleFrameObservable<T> parent;
             readonly object gate = new object();
             T latestValue = default(T);
@@ -35,24 +30,20 @@ namespace UniRx.Operators
             SerialDisposable cancelable;
             ulong id = 0;
 
-            public ThrottleFrame(ThrottleFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public ThrottleFrame(ThrottleFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 cancelable = new SerialDisposable();
                 var subscription = parent.source.Subscribe(this);
 
                 return StableCompositeDisposable.Create(cancelable, subscription);
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 ulong currentid;
-                lock (gate)
-                {
+                lock (gate) {
                     hasValue = true;
                     latestValue = value;
                     id = unchecked(id + 1);
@@ -65,26 +56,21 @@ namespace UniRx.Operators
                     .Subscribe(new ThrottleFrameTick(this, currentid));
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 cancelable.Dispose();
 
-                lock (gate)
-                {
+                lock (gate) {
                     hasValue = false;
                     id = unchecked(id + 1);
                     try { observer.OnError(error); } finally { Dispose(); }
                 }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 cancelable.Dispose();
 
-                lock (gate)
-                {
-                    if (hasValue)
-                    {
+                lock (gate) {
+                    if (hasValue) {
                         observer.OnNext(latestValue);
                     }
                     hasValue = false;
@@ -93,31 +79,24 @@ namespace UniRx.Operators
                 }
             }
 
-            class ThrottleFrameTick : IObserver<long>
-            {
+            class ThrottleFrameTick : IObserver<long> {
                 readonly ThrottleFrame parent;
                 readonly ulong currentid;
 
-                public ThrottleFrameTick(ThrottleFrame parent, ulong currentid)
-                {
+                public ThrottleFrameTick(ThrottleFrame parent, ulong currentid) {
                     this.parent = parent;
                     this.currentid = currentid;
                 }
 
-                public void OnCompleted()
-                {
+                public void OnCompleted() {
                 }
 
-                public void OnError(Exception error)
-                {
+                public void OnError(Exception error) {
                 }
 
-                public void OnNext(long _)
-                {
-                    lock (parent.gate)
-                    {
-                        if (parent.hasValue && parent.id == currentid)
-                        {
+                public void OnNext(long _) {
+                    lock (parent.gate) {
+                        if (parent.hasValue && parent.id == currentid) {
                             parent.observer.OnNext(parent.latestValue);
                         }
                         parent.hasValue = false;

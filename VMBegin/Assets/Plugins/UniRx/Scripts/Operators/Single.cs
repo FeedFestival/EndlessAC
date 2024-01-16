@@ -1,179 +1,122 @@
 ﻿using System;
 
-namespace UniRx.Operators
-{
-    internal class SingleObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class SingleObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly bool useDefault;
         readonly Func<T, bool> predicate;
 
         public SingleObservable(IObservable<T> source, bool useDefault)
-            : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.useDefault = useDefault;
         }
 
         public SingleObservable(IObservable<T> source, Func<T, bool> predicate, bool useDefault)
-            : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.predicate = predicate;
             this.useDefault = useDefault;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
-            if (predicate == null)
-            {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
+            if (predicate == null) {
                 return source.Subscribe(new Single(this, observer, cancel));
-            }
-            else
-            {
+            } else {
                 return source.Subscribe(new Single_(this, observer, cancel));
             }
         }
 
-        class Single : OperatorObserverBase<T, T>
-        {
+        class Single : OperatorObserverBase<T, T> {
             readonly SingleObservable<T> parent;
             bool seenValue;
             T lastValue;
 
-            public Single(SingleObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Single(SingleObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
                 this.seenValue = false;
             }
 
-            public override void OnNext(T value)
-            {
-                if (seenValue)
-                {
-                    try { observer.OnError(new InvalidOperationException("sequence is not single")); }
-                    finally { Dispose(); }
-                }
-                else
-                {
+            public override void OnNext(T value) {
+                if (seenValue) {
+                    try { observer.OnError(new InvalidOperationException("sequence is not single")); } finally { Dispose(); }
+                } else {
                     seenValue = true;
                     lastValue = value;
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                if (parent.useDefault)
-                {
-                    if (!seenValue)
-                    {
+            public override void OnCompleted() {
+                if (parent.useDefault) {
+                    if (!seenValue) {
                         observer.OnNext(default(T));
-                    }
-                    else
-                    {
+                    } else {
                         observer.OnNext(lastValue);
                     }
-                    try { observer.OnCompleted(); }
-                    finally { Dispose(); }
-                }
-                else
-                {
-                    if (!seenValue)
-                    {
-                        try { observer.OnError(new InvalidOperationException("sequence is empty")); }
-                        finally { Dispose(); }
-                    }
-                    else
-                    {
+                    try { observer.OnCompleted(); } finally { Dispose(); }
+                } else {
+                    if (!seenValue) {
+                        try { observer.OnError(new InvalidOperationException("sequence is empty")); } finally { Dispose(); }
+                    } else {
                         observer.OnNext(lastValue);
-                        try { observer.OnCompleted(); }
-                        finally { Dispose(); }
+                        try { observer.OnCompleted(); } finally { Dispose(); }
                     }
                 }
             }
         }
 
-        class Single_ : OperatorObserverBase<T, T>
-        {
+        class Single_ : OperatorObserverBase<T, T> {
             readonly SingleObservable<T> parent;
             bool seenValue;
             T lastValue;
 
-            public Single_(SingleObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Single_(SingleObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
                 this.seenValue = false;
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 bool isPassed;
-                try
-                {
+                try {
                     isPassed = parent.predicate(value);
-                }
-                catch (Exception ex)
-                {
-                    try { observer.OnError(ex); }
-                    finally { Dispose(); }
+                } catch (Exception ex) {
+                    try { observer.OnError(ex); } finally { Dispose(); }
                     return;
                 }
 
-                if (isPassed)
-                {
-                    if (seenValue)
-                    {
-                        try { observer.OnError(new InvalidOperationException("sequence is not single")); }
-                        finally { Dispose(); }
+                if (isPassed) {
+                    if (seenValue) {
+                        try { observer.OnError(new InvalidOperationException("sequence is not single")); } finally { Dispose(); }
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         seenValue = true;
                         lastValue = value;
                     }
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                if (parent.useDefault)
-                {
-                    if (!seenValue)
-                    {
+            public override void OnCompleted() {
+                if (parent.useDefault) {
+                    if (!seenValue) {
                         observer.OnNext(default(T));
-                    }
-                    else
-                    {
+                    } else {
                         observer.OnNext(lastValue);
                     }
-                    try { observer.OnCompleted(); }
-                    finally { Dispose(); }
-                }
-                else
-                {
-                    if (!seenValue)
-                    {
-                        try { observer.OnError(new InvalidOperationException("sequence is empty")); }
-                        finally { Dispose(); }
-                    }
-                    else
-                    {
+                    try { observer.OnCompleted(); } finally { Dispose(); }
+                } else {
+                    if (!seenValue) {
+                        try { observer.OnError(new InvalidOperationException("sequence is empty")); } finally { Dispose(); }
+                    } else {
                         observer.OnNext(lastValue);
-                        try { observer.OnCompleted(); }
-                        finally { Dispose(); }
+                        try { observer.OnCompleted(); } finally { Dispose(); }
                     }
                 }
             }

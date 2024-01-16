@@ -1,10 +1,10 @@
+using DG.Tweening;
 using Game.Shared.Interfaces;
 using System;
 using UniRx;
 using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.AI;
-using DG.Tweening;
 
 namespace Game.Unit {
     public class Motor : MonoBehaviour {
@@ -275,7 +275,7 @@ namespace Game.Unit {
 
             _rotateTween = DOVirtual
             .Float(0, 1, 0.33f, (value) => {
-                transform.rotation =  Quaternion.Slerp(transform.rotation, lookAt, value);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookAt, value);
             });
         }
 

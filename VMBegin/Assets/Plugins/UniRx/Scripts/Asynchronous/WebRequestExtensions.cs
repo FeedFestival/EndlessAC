@@ -3,34 +3,24 @@ using System.IO;
 using System.Net;
 using System.Threading;
 
-namespace UniRx
-{
-    public static class WebRequestExtensions
-    {
-        static IObservable<TResult> AbortableDeferredAsyncRequest<TResult>(Func<AsyncCallback, object, IAsyncResult> begin, Func<IAsyncResult, TResult> end, WebRequest request)
-        {
-            var result = Observable.Create<TResult>(observer =>
-            {
+namespace UniRx {
+    public static class WebRequestExtensions {
+        static IObservable<TResult> AbortableDeferredAsyncRequest<TResult>(Func<AsyncCallback, object, IAsyncResult> begin, Func<IAsyncResult, TResult> end, WebRequest request) {
+            var result = Observable.Create<TResult>(observer => {
                 var isCompleted = -1;
                 var subscription = Observable.FromAsyncPattern<TResult>(begin,
-                    ar =>
-                    {
-                        try
-                        {
+                    ar => {
+                        try {
                             Interlocked.Increment(ref isCompleted);
                             return end(ar);
-                        }
-                        catch (WebException ex)
-                        {
+                        } catch (WebException ex) {
                             if (ex.Status == WebExceptionStatus.RequestCanceled) return default(TResult);
                             throw;
                         }
                     })()
                     .Subscribe(observer);
-                return Disposable.Create(() =>
-                {
-                    if (Interlocked.Increment(ref isCompleted) == 0)
-                    {
+                return Disposable.Create(() => {
+                    if (Interlocked.Increment(ref isCompleted) == 0) {
                         subscription.Dispose();
                         request.Abort();
                     }
@@ -40,18 +30,15 @@ namespace UniRx
             return result;
         }
 
-        public static IObservable<WebResponse> GetResponseAsObservable(this WebRequest request)
-        {
+        public static IObservable<WebResponse> GetResponseAsObservable(this WebRequest request) {
             return AbortableDeferredAsyncRequest<WebResponse>(request.BeginGetResponse, request.EndGetResponse, request);
         }
 
-        public static IObservable<HttpWebResponse> GetResponseAsObservable(this HttpWebRequest request)
-        {
+        public static IObservable<HttpWebResponse> GetResponseAsObservable(this HttpWebRequest request) {
             return AbortableDeferredAsyncRequest<HttpWebResponse>(request.BeginGetResponse, ar => (HttpWebResponse)request.EndGetResponse(ar), request);
         }
 
-        public static IObservable<Stream> GetRequestStreamAsObservable(this WebRequest request)
-        {
+        public static IObservable<Stream> GetRequestStreamAsObservable(this WebRequest request) {
             return AbortableDeferredAsyncRequest<Stream>(request.BeginGetRequestStream, request.EndGetRequestStream, request);
         }
     }

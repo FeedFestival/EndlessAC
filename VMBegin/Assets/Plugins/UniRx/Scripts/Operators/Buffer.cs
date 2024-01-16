@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UniRx.Operators
-{
-    internal class BufferObservable<T> : OperatorObservableBase<IList<T>>
-    {
+namespace UniRx.Operators {
+    internal class BufferObservable<T> : OperatorObservableBase<IList<T>> {
         readonly IObservable<T> source;
         readonly int count;
         readonly int skip;
@@ -14,16 +12,14 @@ namespace UniRx.Operators
         readonly IScheduler scheduler;
 
         public BufferObservable(IObservable<T> source, int count, int skip)
-            : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.count = count;
             this.skip = skip;
         }
 
         public BufferObservable(IObservable<T> source, TimeSpan timeSpan, TimeSpan timeShift, IScheduler scheduler)
-            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.timeSpan = timeSpan;
             this.timeShift = timeShift;
@@ -31,43 +27,29 @@ namespace UniRx.Operators
         }
 
         public BufferObservable(IObservable<T> source, TimeSpan timeSpan, int count, IScheduler scheduler)
-            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.timeSpan = timeSpan;
             this.count = count;
             this.scheduler = scheduler;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<IList<T>> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<IList<T>> observer, IDisposable cancel) {
             // count,skip
-            if (scheduler == null)
-            {
-                if (skip == 0)
-                {
+            if (scheduler == null) {
+                if (skip == 0) {
                     return new Buffer(this, observer, cancel).Run();
-                }
-                else
-                {
+                } else {
                     return new Buffer_(this, observer, cancel).Run();
                 }
-            }
-            else
-            {
+            } else {
                 // time + count
-                if (count > 0)
-                {
+                if (count > 0) {
                     return new BufferTC(this, observer, cancel).Run();
-                }
-                else
-                {
-                    if (timeSpan == timeShift)
-                    {
+                } else {
+                    if (timeSpan == timeShift) {
                         return new BufferT(this, observer, cancel).Run();
-                    }
-                    else
-                    {
+                    } else {
                         return new BufferTS(this, observer, cancel).Run();
                     }
                 }
@@ -75,41 +57,33 @@ namespace UniRx.Operators
         }
 
         // count only
-        class Buffer : OperatorObserverBase<T, IList<T>>
-        {
+        class Buffer : OperatorObserverBase<T, IList<T>> {
             readonly BufferObservable<T> parent;
             List<T> list;
 
-            public Buffer(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Buffer(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 list = new List<T>(parent.count);
                 return parent.source.Subscribe(this);
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 list.Add(value);
-                if (list.Count == parent.count)
-                {
+                if (list.Count == parent.count) {
                     observer.OnNext(list);
                     list = new List<T>(parent.count);
                 }
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                if (list.Count > 0)
-                {
+            public override void OnCompleted() {
+                if (list.Count > 0) {
                     observer.OnNext(list);
                 }
                 try { observer.OnCompleted(); } finally { Dispose(); }
@@ -117,58 +91,46 @@ namespace UniRx.Operators
         }
 
         // count and skip
-        class Buffer_ : OperatorObserverBase<T, IList<T>>
-        {
+        class Buffer_ : OperatorObserverBase<T, IList<T>> {
             readonly BufferObservable<T> parent;
             Queue<List<T>> q;
             int index;
 
-            public Buffer_(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Buffer_(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 q = new Queue<List<T>>();
                 index = -1;
                 return parent.source.Subscribe(this);
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 index++;
 
-                if (index % parent.skip == 0)
-                {
+                if (index % parent.skip == 0) {
                     q.Enqueue(new List<T>(parent.count));
                 }
 
                 var len = q.Count;
-                for (int i = 0; i < len; i++)
-                {
+                for (int i = 0; i < len; i++) {
                     var list = q.Dequeue();
                     list.Add(value);
-                    if (list.Count == parent.count)
-                    {
+                    if (list.Count == parent.count) {
                         observer.OnNext(list);
-                    }
-                    else
-                    {
+                    } else {
                         q.Enqueue(list);
                     }
                 }
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                foreach (var list in q)
-                {
+            public override void OnCompleted() {
+                foreach (var list in q) {
                     observer.OnNext(list);
                 }
                 try { observer.OnCompleted(); } finally { Dispose(); }
@@ -176,8 +138,7 @@ namespace UniRx.Operators
         }
 
         // timespan = timeshift
-        class BufferT : OperatorObserverBase<T, IList<T>>
-        {
+        class BufferT : OperatorObserverBase<T, IList<T>> {
             static readonly T[] EmptyArray = new T[0];
 
             readonly BufferObservable<T> parent;
@@ -185,13 +146,11 @@ namespace UniRx.Operators
 
             List<T> list;
 
-            public BufferT(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public BufferT(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 list = new List<T>();
 
                 var timerSubscription = Observable.Interval(parent.timeSpan, parent.scheduler)
@@ -202,52 +161,40 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(timerSubscription, sourceSubscription);
             }
 
-            public override void OnNext(T value)
-            {
-                lock (gate)
-                {
+            public override void OnNext(T value) {
+                lock (gate) {
                     list.Add(value);
                 }
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 List<T> currentList;
-                lock (gate)
-                {
+                lock (gate) {
                     currentList = list;
                 }
                 observer.OnNext(currentList);
                 try { observer.OnCompleted(); } finally { Dispose(); }
             }
 
-            class Buffer : IObserver<long>
-            {
+            class Buffer : IObserver<long> {
                 BufferT parent;
 
-                public Buffer(BufferT parent)
-                {
+                public Buffer(BufferT parent) {
                     this.parent = parent;
                 }
 
-                public void OnNext(long value)
-                {
+                public void OnNext(long value) {
                     var isZero = false;
                     List<T> currentList;
-                    lock (parent.gate)
-                    {
+                    lock (parent.gate) {
                         currentList = parent.list;
-                        if (currentList.Count != 0)
-                        {
+                        if (currentList.Count != 0) {
                             parent.list = new List<T>();
-                        }
-                        else
-                        {
+                        } else {
                             isZero = true;
                         }
                     }
@@ -255,19 +202,16 @@ namespace UniRx.Operators
                     parent.observer.OnNext((isZero) ? (IList<T>)EmptyArray : currentList);
                 }
 
-                public void OnError(Exception error)
-                {
+                public void OnError(Exception error) {
                 }
 
-                public void OnCompleted()
-                {
+                public void OnCompleted() {
                 }
             }
         }
 
         // timespan + timeshift
-        class BufferTS : OperatorObserverBase<T, IList<T>>
-        {
+        class BufferTS : OperatorObserverBase<T, IList<T>> {
             readonly BufferObservable<T> parent;
             readonly object gate = new object();
 
@@ -277,13 +221,11 @@ namespace UniRx.Operators
             TimeSpan nextSpan;
             SerialDisposable timerD;
 
-            public BufferTS(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public BufferTS(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 totalTime = TimeSpan.Zero;
                 nextShift = parent.timeShift;
                 nextSpan = parent.timeSpan;
@@ -299,19 +241,16 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(subscription, timerD);
             }
 
-            void CreateTimer()
-            {
+            void CreateTimer() {
                 var m = new SingleAssignmentDisposable();
                 timerD.Disposable = m;
 
                 var isSpan = false;
                 var isShift = false;
-                if (nextSpan == nextShift)
-                {
+                if (nextSpan == nextShift) {
                     isSpan = true;
                     isShift = true;
-                }
-                else if (nextSpan < nextShift)
+                } else if (nextSpan < nextShift)
                     isSpan = true;
                 else
                     isShift = true;
@@ -325,17 +264,13 @@ namespace UniRx.Operators
                 if (isShift)
                     nextShift += parent.timeShift;
 
-                m.Disposable = parent.scheduler.Schedule(ts, () =>
-                {
-                    lock (gate)
-                    {
-                        if (isShift)
-                        {
+                m.Disposable = parent.scheduler.Schedule(ts, () => {
+                    lock (gate) {
+                        if (isShift) {
                             var s = new List<T>();
                             q.Enqueue(s);
                         }
-                        if (isSpan)
-                        {
+                        if (isSpan) {
                             var s = q.Dequeue();
                             observer.OnNext(s);
                         }
@@ -345,28 +280,21 @@ namespace UniRx.Operators
                 });
             }
 
-            public override void OnNext(T value)
-            {
-                lock (gate)
-                {
-                    foreach (var s in q)
-                    {
+            public override void OnNext(T value) {
+                lock (gate) {
+                    foreach (var s in q) {
                         s.Add(value);
                     }
                 }
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                lock (gate)
-                {
-                    foreach (var list in q)
-                    {
+            public override void OnCompleted() {
+                lock (gate) {
+                    foreach (var list in q) {
                         observer.OnNext(list);
                     }
 
@@ -376,8 +304,7 @@ namespace UniRx.Operators
         }
 
         // timespan + count
-        class BufferTC : OperatorObserverBase<T, IList<T>>
-        {
+        class BufferTC : OperatorObserverBase<T, IList<T>> {
             static readonly T[] EmptyArray = new T[0]; // cache
 
             readonly BufferObservable<T> parent;
@@ -387,13 +314,11 @@ namespace UniRx.Operators
             long timerId;
             SerialDisposable timerD;
 
-            public BufferTC(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public BufferTC(BufferObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 list = new List<T>();
                 timerId = 0L;
                 timerD = new SerialDisposable();
@@ -404,39 +329,30 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(subscription, timerD);
             }
 
-            void CreateTimer()
-            {
+            void CreateTimer() {
                 var currentTimerId = timerId;
                 var timerS = new SingleAssignmentDisposable();
                 timerD.Disposable = timerS; // restart timer(dispose before)
 
 
                 var periodicScheduler = parent.scheduler as ISchedulerPeriodic;
-                if (periodicScheduler != null)
-                {
+                if (periodicScheduler != null) {
                     timerS.Disposable = periodicScheduler.SchedulePeriodic(parent.timeSpan, () => OnNextTick(currentTimerId));
-                }
-                else
-                {
+                } else {
                     timerS.Disposable = parent.scheduler.Schedule(parent.timeSpan, self => OnNextRecursive(currentTimerId, self));
                 }
             }
 
-            void OnNextTick(long currentTimerId)
-            {
+            void OnNextTick(long currentTimerId) {
                 var isZero = false;
                 List<T> currentList;
-                lock (gate)
-                {
+                lock (gate) {
                     if (currentTimerId != timerId) return;
 
                     currentList = list;
-                    if (currentList.Count != 0)
-                    {
+                    if (currentList.Count != 0) {
                         list = new List<T>();
-                    }
-                    else
-                    {
+                    } else {
                         isZero = true;
                     }
                 }
@@ -444,21 +360,16 @@ namespace UniRx.Operators
                 observer.OnNext((isZero) ? (IList<T>)EmptyArray : currentList);
             }
 
-            void OnNextRecursive(long currentTimerId, Action<TimeSpan> self)
-            {
+            void OnNextRecursive(long currentTimerId, Action<TimeSpan> self) {
                 var isZero = false;
                 List<T> currentList;
-                lock (gate)
-                {
+                lock (gate) {
                     if (currentTimerId != timerId) return;
 
                     currentList = list;
-                    if (currentList.Count != 0)
-                    {
+                    if (currentList.Count != 0) {
                         list = new List<T>();
-                    }
-                    else
-                    {
+                    } else {
                         isZero = true;
                     }
                 }
@@ -467,36 +378,29 @@ namespace UniRx.Operators
                 self(parent.timeSpan);
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 List<T> currentList = null;
-                lock (gate)
-                {
+                lock (gate) {
                     list.Add(value);
-                    if (list.Count == parent.count)
-                    {
+                    if (list.Count == parent.count) {
                         currentList = list;
                         list = new List<T>();
                         timerId++;
                         CreateTimer();
                     }
                 }
-                if (currentList != null)
-                {
+                if (currentList != null) {
                     observer.OnNext(currentList);
                 }
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 List<T> currentList;
-                lock (gate)
-                {
+                lock (gate) {
                     timerId++;
                     currentList = list;
                 }
@@ -506,38 +410,32 @@ namespace UniRx.Operators
         }
     }
 
-    internal class BufferObservable<TSource, TWindowBoundary> : OperatorObservableBase<IList<TSource>>
-    {
+    internal class BufferObservable<TSource, TWindowBoundary> : OperatorObservableBase<IList<TSource>> {
         readonly IObservable<TSource> source;
         readonly IObservable<TWindowBoundary> windowBoundaries;
 
         public BufferObservable(IObservable<TSource> source, IObservable<TWindowBoundary> windowBoundaries)
-            : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.windowBoundaries = windowBoundaries;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<IList<TSource>> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<IList<TSource>> observer, IDisposable cancel) {
             return new Buffer(this, observer, cancel).Run();
         }
 
-        class Buffer : OperatorObserverBase<TSource, IList<TSource>>
-        {
+        class Buffer : OperatorObserverBase<TSource, IList<TSource>> {
             static readonly TSource[] EmptyArray = new TSource[0]; // cache
 
             readonly BufferObservable<TSource, TWindowBoundary> parent;
             object gate = new object();
             List<TSource> list;
 
-            public Buffer(BufferObservable<TSource, TWindowBoundary> parent, IObserver<IList<TSource>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Buffer(BufferObservable<TSource, TWindowBoundary> parent, IObserver<IList<TSource>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 list = new List<TSource>();
 
                 var sourceSubscription = parent.source.Subscribe(this);
@@ -546,26 +444,20 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(sourceSubscription, windowSubscription);
             }
 
-            public override void OnNext(TSource value)
-            {
-                lock (gate)
-                {
+            public override void OnNext(TSource value) {
+                lock (gate) {
                     list.Add(value);
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                lock (gate)
-                {
+            public override void OnError(Exception error) {
+                lock (gate) {
                     try { observer.OnError(error); } finally { Dispose(); }
                 }
             }
 
-            public override void OnCompleted()
-            {
-                lock (gate)
-                {
+            public override void OnCompleted() {
+                lock (gate) {
                     var currentList = list;
                     list = new List<TSource>(); // safe
                     observer.OnNext(currentList);
@@ -573,48 +465,36 @@ namespace UniRx.Operators
                 }
             }
 
-            class Buffer_ : IObserver<TWindowBoundary>
-            {
+            class Buffer_ : IObserver<TWindowBoundary> {
                 readonly Buffer parent;
 
-                public Buffer_(Buffer parent)
-                {
+                public Buffer_(Buffer parent) {
                     this.parent = parent;
                 }
 
-                public void OnNext(TWindowBoundary value)
-                {
+                public void OnNext(TWindowBoundary value) {
                     var isZero = false;
                     List<TSource> currentList;
-                    lock (parent.gate)
-                    {
+                    lock (parent.gate) {
                         currentList = parent.list;
-                        if (currentList.Count != 0)
-                        {
+                        if (currentList.Count != 0) {
                             parent.list = new List<TSource>();
-                        }
-                        else
-                        {
+                        } else {
                             isZero = true;
                         }
                     }
-                    if (isZero)
-                    {
+                    if (isZero) {
                         parent.observer.OnNext(EmptyArray);
-                    }
-                    else
-                    {
+                    } else {
                         parent.observer.OnNext(currentList);
                     }
                 }
 
-                public void OnError(Exception error)
-                {
+                public void OnError(Exception error) {
                     parent.OnError(error);
                 }
 
-                public void OnCompleted()
-                {
+                public void OnCompleted() {
                     parent.OnCompleted();
                 }
             }

@@ -1,13 +1,8 @@
-namespace Game.Shared.Bus
-{
-    public static class __
-    {
-        public static IGameBus GameBus
-        {
-            get
-            {
-                if (_gameBus == null)
-                {
+namespace Game.Shared.Bus {
+    public static class __ {
+        public static IGameBus GameBus {
+            get {
+                if (_gameBus == null) {
                     _gameBus = new GameBus();
                 }
                 return _gameBus;
@@ -15,12 +10,9 @@ namespace Game.Shared.Bus
         }
         private static IGameBus _gameBus;
 
-        public static IInteractBus InteractBus
-        {
-            get
-            {
-                if (_bus == null)
-                {
+        public static IInteractBus InteractBus {
+            get {
+                if (_bus == null) {
                     _bus = new InteractBus();
                 }
                 return _bus;
@@ -28,8 +20,7 @@ namespace Game.Shared.Bus
         }
         private static IInteractBus _bus;
 
-        public static void ClearAll()
-        {
+        public static void ClearAll() {
             _gameBus = null;
         }
     }

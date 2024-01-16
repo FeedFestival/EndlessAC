@@ -1,10 +1,8 @@
 using System;
 using UniRx;
 
-namespace GameScrypt.Bus
-{
-    public interface IBus
-    {
+namespace GameScrypt.Bus {
+    public interface IBus {
         IEvtPackage On(object evt, Action handler);
         IEvtPackage On(object evt, Action<object> handler);
         IEvtPackage On(int eventId, Action<object> handler, IScheduler runOn);

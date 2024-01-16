@@ -7,7 +7,7 @@ namespace Game.Shared.Interfaces {
         IActor Actor { get; }
         GameObject gameObject { get; }
 
-        void Init(ITrigger movementTargetTrigger = null);
+        void Init(IWorldIndicatorManager worldIndicatorManager = null);
         void MovementInputChanged(Vector2 input, float cameraRotationY, bool analogMovement);
         void MovementTargetChanged(Vector3 pos);
         void Teleport(Vector3 position);

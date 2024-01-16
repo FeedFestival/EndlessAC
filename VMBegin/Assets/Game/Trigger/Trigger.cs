@@ -2,7 +2,7 @@ using Game.Shared.Interfaces;
 using System;
 using UnityEngine;
 
-namespace Game.TriggerClutter {
+namespace Game.Trigger {
     public class Trigger : MonoBehaviour, ITrigger {
         public int ID { get; set; }
 

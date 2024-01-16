@@ -156,7 +156,7 @@ namespace Game.Main {
                     " + "\"" + entityType.Key + "\"" + @",
                     new Dictionary<string, int>() { 
 ";
-                
+
 
                 var toSaveValues = new Dictionary<int, string>();
                 foreach (var entityName in entityType.Value) {

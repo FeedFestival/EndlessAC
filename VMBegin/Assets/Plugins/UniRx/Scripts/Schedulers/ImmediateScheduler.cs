@@ -1,34 +1,26 @@
 ﻿using System;
 using System.Threading;
 
-namespace UniRx
-{
-    public static partial class Scheduler
-    {
+namespace UniRx {
+    public static partial class Scheduler {
         public static readonly IScheduler Immediate = new ImmediateScheduler();
 
-        class ImmediateScheduler : IScheduler
-        {
-            public ImmediateScheduler()
-            {
+        class ImmediateScheduler : IScheduler {
+            public ImmediateScheduler() {
             }
 
-            public DateTimeOffset Now
-            {
+            public DateTimeOffset Now {
                 get { return Scheduler.Now; }
             }
 
-            public IDisposable Schedule(Action action)
-            {
+            public IDisposable Schedule(Action action) {
                 action();
                 return Disposable.Empty;
             }
 
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
-            {
+            public IDisposable Schedule(TimeSpan dueTime, Action action) {
                 var wait = Scheduler.Normalize(dueTime);
-                if (wait.Ticks > 0)
-                {
+                if (wait.Ticks > 0) {
                     Thread.Sleep(wait);
                 }
 

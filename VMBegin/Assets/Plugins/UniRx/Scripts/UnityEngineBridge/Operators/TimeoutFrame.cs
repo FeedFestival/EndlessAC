@@ -6,28 +6,23 @@ using UnityObservable = UniRx.ObservableUnity;
 using UnityObservable = UniRx.Observable;
 #endif
 
-namespace UniRx.Operators
-{
-    internal class TimeoutFrameObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class TimeoutFrameObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly int frameCount;
         readonly FrameCountType frameCountType;
 
-        public TimeoutFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+        public TimeoutFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.frameCount = frameCount;
             this.frameCountType = frameCountType;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             return new TimeoutFrame(this, observer, cancel).Run();
         }
 
-        class TimeoutFrame : OperatorObserverBase<T, T>
-        {
+        class TimeoutFrame : OperatorObserverBase<T, T> {
             readonly TimeoutFrameObservable<T> parent;
             readonly object gate = new object();
             ulong objectId = 0ul;
@@ -35,13 +30,11 @@ namespace UniRx.Operators
             SingleAssignmentDisposable sourceSubscription;
             SerialDisposable timerSubscription;
 
-            public TimeoutFrame(TimeoutFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public TimeoutFrame(TimeoutFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 sourceSubscription = new SingleAssignmentDisposable();
                 timerSubscription = new SerialDisposable();
                 timerSubscription.Disposable = RunTimer(objectId);
@@ -50,18 +43,15 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(timerSubscription, sourceSubscription);
             }
 
-            IDisposable RunTimer(ulong timerId)
-            {
+            IDisposable RunTimer(ulong timerId) {
                 return UnityObservable.TimerFrame(parent.frameCount, parent.frameCountType)
                     .Subscribe(new TimeoutFrameTick(this, timerId));
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 ulong useObjectId;
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                     useObjectId = objectId;
@@ -73,11 +63,9 @@ namespace UniRx.Operators
                 timerSubscription.Disposable = RunTimer(useObjectId);
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                 }
@@ -87,11 +75,9 @@ namespace UniRx.Operators
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                 }
@@ -101,38 +87,30 @@ namespace UniRx.Operators
                 try { observer.OnCompleted(); } finally { Dispose(); }
             }
 
-            class TimeoutFrameTick : IObserver<long>
-            {
+            class TimeoutFrameTick : IObserver<long> {
                 readonly TimeoutFrame parent;
                 readonly ulong timerId;
 
-                public TimeoutFrameTick(TimeoutFrame parent, ulong timerId)
-                {
+                public TimeoutFrameTick(TimeoutFrame parent, ulong timerId) {
                     this.parent = parent;
                     this.timerId = timerId;
                 }
 
-                public void OnCompleted()
-                {
+                public void OnCompleted() {
                 }
 
-                public void OnError(Exception error)
-                {
+                public void OnError(Exception error) {
                 }
 
-                public void OnNext(long _)
-                {
+                public void OnNext(long _) {
 
 
-                    lock (parent.gate)
-                    {
-                        if (parent.objectId == timerId)
-                        {
+                    lock (parent.gate) {
+                        if (parent.objectId == timerId) {
                             parent.isTimeout = true;
                         }
                     }
-                    if (parent.isTimeout)
-                    {
+                    if (parent.isTimeout) {
                         try { parent.observer.OnError(new TimeoutException()); } finally { parent.Dispose(); }
                     }
                 }

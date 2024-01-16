@@ -1,0 +1,6 @@
+GridBackground {
+	--grid-background-color: var(--gj-color-grid-light-gray-1);
+	--line-color: var(--gj-color-grid-light-gray-2);
+	--thick-line-color: var(--gj-color-grid-light-gray-3);
+	--spacing: var(--gj-metrics-grid-pixels-25);
+}

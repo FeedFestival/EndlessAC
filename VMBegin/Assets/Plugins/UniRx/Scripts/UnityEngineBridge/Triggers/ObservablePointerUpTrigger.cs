@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservablePointerUpTrigger : ObservableTriggerBase, IEventSystemHandler, IPointerUpHandler
-    {
+    public class ObservablePointerUpTrigger : ObservableTriggerBase, IEventSystemHandler, IPointerUpHandler {
         Subject<PointerEventData> onPointerUp;
 
-        void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
-        {
+        void IPointerUpHandler.OnPointerUp(PointerEventData eventData) {
             if (onPointerUp != null) onPointerUp.OnNext(eventData);
         }
 
-        public IObservable<PointerEventData> OnPointerUpAsObservable()
-        {
+        public IObservable<PointerEventData> OnPointerUpAsObservable() {
             return onPointerUp ?? (onPointerUp = new Subject<PointerEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onPointerUp != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onPointerUp != null) {
                 onPointerUp.OnCompleted();
             }
         }

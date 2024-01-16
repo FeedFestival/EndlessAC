@@ -1,44 +1,35 @@
 ﻿using System;
 
-namespace UniRx.Operators
-{
-    internal class TimeoutObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class TimeoutObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly TimeSpan? dueTime;
         readonly DateTimeOffset? dueTimeDT;
         readonly IScheduler scheduler;
 
         public TimeoutObservable(IObservable<T> source, TimeSpan dueTime, IScheduler scheduler)
-            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.dueTime = dueTime;
             this.scheduler = scheduler;
         }
 
         public TimeoutObservable(IObservable<T> source, DateTimeOffset dueTime, IScheduler scheduler)
-            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(scheduler == Scheduler.CurrentThread || source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.dueTimeDT = dueTime;
             this.scheduler = scheduler;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
-            if (dueTime != null)
-            {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
+            if (dueTime != null) {
                 return new Timeout(this, observer, cancel).Run();
-            }
-            else
-            {
+            } else {
                 return new Timeout_(this, observer, cancel).Run();
             }
         }
 
-        class Timeout : OperatorObserverBase<T, T>
-        {
+        class Timeout : OperatorObserverBase<T, T> {
             readonly TimeoutObservable<T> parent;
             readonly object gate = new object();
             ulong objectId = 0ul;
@@ -46,13 +37,11 @@ namespace UniRx.Operators
             SingleAssignmentDisposable sourceSubscription;
             SerialDisposable timerSubscription;
 
-            public Timeout(TimeoutObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Timeout(TimeoutObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 sourceSubscription = new SingleAssignmentDisposable();
                 timerSubscription = new SerialDisposable();
                 timerSubscription.Disposable = RunTimer(objectId);
@@ -61,30 +50,23 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(timerSubscription, sourceSubscription);
             }
 
-            IDisposable RunTimer(ulong timerId)
-            {
-                return parent.scheduler.Schedule(parent.dueTime.Value, () =>
-                {
-                    lock (gate)
-                    {
-                        if (objectId == timerId)
-                        {
+            IDisposable RunTimer(ulong timerId) {
+                return parent.scheduler.Schedule(parent.dueTime.Value, () => {
+                    lock (gate) {
+                        if (objectId == timerId) {
                             isTimeout = true;
                         }
                     }
-                    if (isTimeout)
-                    {
+                    if (isTimeout) {
                         try { observer.OnError(new TimeoutException()); } finally { Dispose(); }
                     }
                 });
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 ulong useObjectId;
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                     useObjectId = objectId;
@@ -96,11 +78,9 @@ namespace UniRx.Operators
                 timerSubscription.Disposable = RunTimer(useObjectId);
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                 }
@@ -110,11 +90,9 @@ namespace UniRx.Operators
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 bool timeout;
-                lock (gate)
-                {
+                lock (gate) {
                     timeout = isTimeout;
                     objectId++;
                 }
@@ -125,21 +103,18 @@ namespace UniRx.Operators
             }
         }
 
-        class Timeout_ : OperatorObserverBase<T, T>
-        {
+        class Timeout_ : OperatorObserverBase<T, T> {
             readonly TimeoutObservable<T> parent;
             readonly object gate = new object();
             bool isFinished = false;
             SingleAssignmentDisposable sourceSubscription;
             IDisposable timerSubscription;
 
-            public Timeout_(TimeoutObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public Timeout_(TimeoutObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 sourceSubscription = new SingleAssignmentDisposable();
 
                 timerSubscription = parent.scheduler.Schedule(parent.dueTimeDT.Value, OnNext);
@@ -149,10 +124,8 @@ namespace UniRx.Operators
             }
 
             // in timer
-            void OnNext()
-            {
-                lock (gate)
-                {
+            void OnNext() {
+                lock (gate) {
                     if (isFinished) return;
                     isFinished = true;
                 }
@@ -161,18 +134,14 @@ namespace UniRx.Operators
                 try { observer.OnError(new TimeoutException()); } finally { Dispose(); }
             }
 
-            public override void OnNext(T value)
-            {
-                lock (gate)
-                {
+            public override void OnNext(T value) {
+                lock (gate) {
                     if (!isFinished) observer.OnNext(value);
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                lock (gate)
-                {
+            public override void OnError(Exception error) {
+                lock (gate) {
                     if (isFinished) return;
                     isFinished = true;
                     timerSubscription.Dispose();
@@ -180,13 +149,10 @@ namespace UniRx.Operators
                 try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
 
-                lock (gate)
-                {
-                    if (!isFinished)
-                    {
+                lock (gate) {
+                    if (!isFinished) {
                         isFinished = true;
                         timerSubscription.Dispose();
                     }

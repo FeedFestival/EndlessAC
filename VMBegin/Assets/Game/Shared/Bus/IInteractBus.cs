@@ -1,9 +1,7 @@
 using Game.Shared.Bus;
-using Game.Shared.Enums;
 using System;
 
-public interface IInteractBus
-{
+public interface IInteractBus {
     bool Emit(InteractEvt evt, object data = null);
     IEventPackage On(InteractEvt evt, Action handler);
     IEventPackage On(InteractEvt evt, Action<object> handler);

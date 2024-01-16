@@ -1,8 +1,5 @@
 using Game.Shared.Bus;
 using Game.Shared.Enums;
-using GameScrypt.GSDictionary;
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game.Main {
@@ -20,7 +17,9 @@ namespace Game.Main {
         //public List<DependencyPrefab> DependencyPrefabs;
         //private Dictionary<Dependency, GameObject> _dependencyPrefabs;
 
-        public UDictionary<Dependency, GameObject> _dependencyPrefabs;
+        //public UDictionary<Dependency, GameObject> _dependencyPrefabs;
+
+        public BasePrefabsSO BasePrefabs;
 
         public static Main _ { get; private set; }
         private void Awake() {
@@ -51,7 +50,7 @@ namespace Game.Main {
         }
 
         public void CreateDependency(Dependency dependency) {
-            Instantiate(_dependencyPrefabs[dependency]);
+            //Instantiate(_dependencyPrefabs[dependency]);
         }
 
         private void OnApplicationQuit() {

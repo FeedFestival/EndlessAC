@@ -1,11 +1,10 @@
-using UnityEngine.Playables;
-using UnityEngine;
+using Game.Actors;
 using Game.Scene;
 using Game.Shared.DataModels;
-using Game.Actors;
-using System;
+using UnityEngine;
+using UnityEngine.Playables;
 
-namespace Game.Chapter.Begining {
+namespace Game.Chapters.Begining {
     public class Begining_GameScene : GameScene {
 
         [Header("Begining_GameScene")]

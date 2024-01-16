@@ -1,10 +1,8 @@
 ﻿using System;
 using UniRx.InternalUtil;
 
-namespace UniRx
-{
-    public sealed class BehaviorSubject<T> : ISubject<T>, IDisposable, IOptimizedObservable<T>
-    {
+namespace UniRx {
+    public sealed class BehaviorSubject<T> : ISubject<T>, IDisposable, IOptimizedObservable<T> {
         object observerLock = new object();
 
         bool isStopped;
@@ -13,34 +11,27 @@ namespace UniRx
         Exception lastError;
         IObserver<T> outObserver = EmptyObserver<T>.Instance;
 
-        public BehaviorSubject(T defaultValue)
-        {
+        public BehaviorSubject(T defaultValue) {
             lastValue = defaultValue;
         }
 
-        public T Value
-        {
-            get
-            {
+        public T Value {
+            get {
                 ThrowIfDisposed();
                 if (lastError != null) lastError.Throw();
                 return lastValue;
             }
         }
 
-        public bool HasObservers
-        {
-            get
-            {
+        public bool HasObservers {
+            get {
                 return !(outObserver is EmptyObserver<T>) && !isStopped && !isDisposed;
             }
         }
 
-        public void OnCompleted()
-        {
+        public void OnCompleted() {
             IObserver<T> old;
-            lock (observerLock)
-            {
+            lock (observerLock) {
                 ThrowIfDisposed();
                 if (isStopped) return;
 
@@ -52,13 +43,11 @@ namespace UniRx
             old.OnCompleted();
         }
 
-        public void OnError(Exception error)
-        {
+        public void OnError(Exception error) {
             if (error == null) throw new ArgumentNullException("error");
 
             IObserver<T> old;
-            lock (observerLock)
-            {
+            lock (observerLock) {
                 ThrowIfDisposed();
                 if (isStopped) return;
 
@@ -71,11 +60,9 @@ namespace UniRx
             old.OnError(error);
         }
 
-        public void OnNext(T value)
-        {
+        public void OnNext(T value) {
             IObserver<T> current;
-            lock (observerLock)
-            {
+            lock (observerLock) {
                 if (isStopped) return;
 
                 lastValue = value;
@@ -85,67 +72,49 @@ namespace UniRx
             current.OnNext(value);
         }
 
-        public IDisposable Subscribe(IObserver<T> observer)
-        {
+        public IDisposable Subscribe(IObserver<T> observer) {
             if (observer == null) throw new ArgumentNullException("observer");
 
             var ex = default(Exception);
             var v = default(T);
             var subscription = default(Subscription);
 
-            lock (observerLock)
-            {
+            lock (observerLock) {
                 ThrowIfDisposed();
-                if (!isStopped)
-                {
+                if (!isStopped) {
                     var listObserver = outObserver as ListObserver<T>;
-                    if (listObserver != null)
-                    {
+                    if (listObserver != null) {
                         outObserver = listObserver.Add(observer);
-                    }
-                    else
-                    {
+                    } else {
                         var current = outObserver;
-                        if (current is EmptyObserver<T>)
-                        {
+                        if (current is EmptyObserver<T>) {
                             outObserver = observer;
-                        }
-                        else
-                        {
+                        } else {
                             outObserver = new ListObserver<T>(new ImmutableList<IObserver<T>>(new[] { current, observer }));
                         }
                     }
 
                     v = lastValue;
                     subscription = new Subscription(this, observer);
-                }
-                else
-                {
+                } else {
                     ex = lastError;
                 }
             }
 
-            if (subscription != null)
-            {
+            if (subscription != null) {
                 observer.OnNext(v);
                 return subscription;
-            }
-            else if (ex != null)
-            {
+            } else if (ex != null) {
                 observer.OnError(ex);
-            }
-            else
-            {
+            } else {
                 observer.OnCompleted();
             }
 
             return Disposable.Empty;
         }
 
-        public void Dispose()
-        {
-            lock (observerLock)
-            {
+        public void Dispose() {
+            lock (observerLock) {
                 isDisposed = true;
                 outObserver = DisposedObserver<T>.Instance;
                 lastError = null;
@@ -153,43 +122,32 @@ namespace UniRx
             }
         }
 
-        void ThrowIfDisposed()
-        {
+        void ThrowIfDisposed() {
             if (isDisposed) throw new ObjectDisposedException("");
         }
 
-        public bool IsRequiredSubscribeOnCurrentThread()
-        {
+        public bool IsRequiredSubscribeOnCurrentThread() {
             return false;
         }
 
-        class Subscription : IDisposable
-        {
+        class Subscription : IDisposable {
             readonly object gate = new object();
             BehaviorSubject<T> parent;
             IObserver<T> unsubscribeTarget;
 
-            public Subscription(BehaviorSubject<T> parent, IObserver<T> unsubscribeTarget)
-            {
+            public Subscription(BehaviorSubject<T> parent, IObserver<T> unsubscribeTarget) {
                 this.parent = parent;
                 this.unsubscribeTarget = unsubscribeTarget;
             }
 
-            public void Dispose()
-            {
-                lock (gate)
-                {
-                    if (parent != null)
-                    {
-                        lock (parent.observerLock)
-                        {
+            public void Dispose() {
+                lock (gate) {
+                    if (parent != null) {
+                        lock (parent.observerLock) {
                             var listObserver = parent.outObserver as ListObserver<T>;
-                            if (listObserver != null)
-                            {
+                            if (listObserver != null) {
                                 parent.outObserver = listObserver.Remove(unsubscribeTarget);
-                            }
-                            else
-                            {
+                            } else {
                                 parent.outObserver = EmptyObserver<T>.Instance;
                             }
 

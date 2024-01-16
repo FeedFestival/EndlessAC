@@ -1,28 +1,22 @@
 ﻿using System;
 
-namespace UniRx.Operators
-{
-    internal class AmbObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class AmbObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly IObservable<T> second;
 
         public AmbObservable(IObservable<T> source, IObservable<T> second)
-            : base(source.IsRequiredSubscribeOnCurrentThread() || second.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(source.IsRequiredSubscribeOnCurrentThread() || second.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.second = second;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             return new AmbOuterObserver(this, observer, cancel).Run();
         }
 
-        class AmbOuterObserver : OperatorObserverBase<T, T>
-        {
-            enum AmbState
-            {
+        class AmbOuterObserver : OperatorObserverBase<T, T> {
+            enum AmbState {
                 Left, Right, Neither
             }
 
@@ -33,13 +27,11 @@ namespace UniRx.Operators
             AmbState choice = AmbState.Neither;
 
             public AmbOuterObserver(AmbObservable<T> parent, IObserver<T> observer, IDisposable cancel)
-                : base(observer, cancel)
-            {
+                : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 leftSubscription = new SingleAssignmentDisposable();
                 rightSubscription = new SingleAssignmentDisposable();
                 var d = StableCompositeDisposable.Create(leftSubscription, rightSubscription);
@@ -58,79 +50,61 @@ namespace UniRx.Operators
                 return d;
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 // no use
             }
 
-            public override void OnError(Exception error)
-            {
+            public override void OnError(Exception error) {
                 // no use
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 // no use
             }
 
-            class Amb : IObserver<T>
-            {
+            class Amb : IObserver<T> {
                 public IObserver<T> targetObserver;
                 public IDisposable targetDisposable;
 
-                public void OnNext(T value)
-                {
+                public void OnNext(T value) {
                     targetObserver.OnNext(value);
                 }
 
-                public void OnError(Exception error)
-                {
-                    try
-                    {
+                public void OnError(Exception error) {
+                    try {
                         targetObserver.OnError(error);
-                    }
-                    finally
-                    {
+                    } finally {
                         targetObserver = UniRx.InternalUtil.EmptyObserver<T>.Instance;
                         targetDisposable.Dispose();
                     }
                 }
 
-                public void OnCompleted()
-                {
-                    try
-                    {
+                public void OnCompleted() {
+                    try {
                         targetObserver.OnCompleted();
-                    }
-                    finally
-                    {
+                    } finally {
                         targetObserver = UniRx.InternalUtil.EmptyObserver<T>.Instance;
                         targetDisposable.Dispose();
                     }
                 }
             }
 
-            class AmbDecisionObserver : IObserver<T>
-            {
+            class AmbDecisionObserver : IObserver<T> {
                 readonly AmbOuterObserver parent;
                 readonly AmbState me;
                 readonly IDisposable otherSubscription;
                 readonly Amb self;
 
-                public AmbDecisionObserver(AmbOuterObserver parent, AmbState me, IDisposable otherSubscription, Amb self)
-                {
+                public AmbDecisionObserver(AmbOuterObserver parent, AmbState me, IDisposable otherSubscription, Amb self) {
                     this.parent = parent;
                     this.me = me;
                     this.otherSubscription = otherSubscription;
                     this.self = self;
                 }
 
-                public void OnNext(T value)
-                {
-                    lock (parent.gate)
-                    {
-                        if (parent.choice == AmbState.Neither)
-                        {
+                public void OnNext(T value) {
+                    lock (parent.gate) {
+                        if (parent.choice == AmbState.Neither) {
                             parent.choice = me;
                             otherSubscription.Dispose();
                             self.targetObserver = parent.observer;
@@ -140,37 +114,29 @@ namespace UniRx.Operators
                     }
                 }
 
-                public void OnError(Exception error)
-                {
-                    lock (parent.gate)
-                    {
-                        if (parent.choice == AmbState.Neither)
-                        {
+                public void OnError(Exception error) {
+                    lock (parent.gate) {
+                        if (parent.choice == AmbState.Neither) {
                             parent.choice = me;
                             otherSubscription.Dispose();
                             self.targetObserver = parent.observer;
                         }
 
-                        if (parent.choice == me)
-                        {
+                        if (parent.choice == me) {
                             self.targetObserver.OnError(error);
                         }
                     }
                 }
 
-                public void OnCompleted()
-                {
-                    lock (parent.gate)
-                    {
-                        if (parent.choice == AmbState.Neither)
-                        {
+                public void OnCompleted() {
+                    lock (parent.gate) {
+                        if (parent.choice == AmbState.Neither) {
                             parent.choice = me;
                             otherSubscription.Dispose();
                             self.targetObserver = parent.observer;
                         }
 
-                        if (parent.choice == me)
-                        {
+                        if (parent.choice == me) {
                             self.targetObserver.OnCompleted();
                         }
                     }

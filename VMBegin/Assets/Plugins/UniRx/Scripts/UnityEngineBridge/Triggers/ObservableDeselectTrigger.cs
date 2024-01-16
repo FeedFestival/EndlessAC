@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservableDeselectTrigger : ObservableTriggerBase, IEventSystemHandler, IDeselectHandler
-    {
+    public class ObservableDeselectTrigger : ObservableTriggerBase, IEventSystemHandler, IDeselectHandler {
         Subject<BaseEventData> onDeselect;
 
-        void IDeselectHandler.OnDeselect(BaseEventData eventData)
-        {
+        void IDeselectHandler.OnDeselect(BaseEventData eventData) {
             if (onDeselect != null) onDeselect.OnNext(eventData);
         }
 
-        public IObservable<BaseEventData> OnDeselectAsObservable()
-        {
+        public IObservable<BaseEventData> OnDeselectAsObservable() {
             return onDeselect ?? (onDeselect = new Subject<BaseEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onDeselect != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onDeselect != null) {
                 onDeselect.OnCompleted();
             }
         }

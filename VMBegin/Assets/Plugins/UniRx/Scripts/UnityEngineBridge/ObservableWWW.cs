@@ -10,8 +10,7 @@ using ObservableUnity = UniRx.Observable;
 #pragma warning disable CS0618
 #endif
 
-namespace UniRx
-{
+namespace UniRx {
     using System.Threading;
 #if !(UNITY_METRO || UNITY_WP8) && (UNITY_4_4 || UNITY_4_3 || UNITY_4_2 || UNITY_4_1 || UNITY_4_0_1 || UNITY_4_0 || UNITY_3_5 || UNITY_3_4 || UNITY_3_3 || UNITY_3_2 || UNITY_3_1 || UNITY_3_0_0 || UNITY_3_0 || UNITY_2_6_1 || UNITY_2_6)
     // Fallback for Unity versions below 4.5
@@ -28,104 +27,84 @@ namespace UniRx
 #if UNITY_2018_3_OR_NEWER
     [Obsolete("Use UnityWebRequest, a fully featured replacement which is more efficient and has additional features")]
 #endif
-    public static partial class ObservableWWW
-    {
-        public static IObservable<string> Get(string url, Hash headers = null, IProgress<float> progress = null)
-        {
+    public static partial class ObservableWWW {
+        public static IObservable<string> Get(string url, Hash headers = null, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<string>((observer, cancellation) => FetchText(new WWW(url, null, (headers ?? new Hash())), observer, progress, cancellation));
         }
 
-        public static IObservable<byte[]> GetAndGetBytes(string url, Hash headers = null, IProgress<float> progress = null)
-        {
+        public static IObservable<byte[]> GetAndGetBytes(string url, Hash headers = null, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<byte[]>((observer, cancellation) => FetchBytes(new WWW(url, null, (headers ?? new Hash())), observer, progress, cancellation));
         }
-        public static IObservable<WWW> GetWWW(string url, Hash headers = null, IProgress<float> progress = null)
-        {
+        public static IObservable<WWW> GetWWW(string url, Hash headers = null, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<WWW>((observer, cancellation) => Fetch(new WWW(url, null, (headers ?? new Hash())), observer, progress, cancellation));
         }
 
-        public static IObservable<string> Post(string url, byte[] postData, IProgress<float> progress = null)
-        {
+        public static IObservable<string> Post(string url, byte[] postData, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<string>((observer, cancellation) => FetchText(new WWW(url, postData), observer, progress, cancellation));
         }
 
-        public static IObservable<string> Post(string url, byte[] postData, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<string> Post(string url, byte[] postData, Hash headers, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<string>((observer, cancellation) => FetchText(new WWW(url, postData, headers), observer, progress, cancellation));
         }
 
-        public static IObservable<string> Post(string url, WWWForm content, IProgress<float> progress = null)
-        {
+        public static IObservable<string> Post(string url, WWWForm content, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<string>((observer, cancellation) => FetchText(new WWW(url, content), observer, progress, cancellation));
         }
 
-        public static IObservable<string> Post(string url, WWWForm content, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<string> Post(string url, WWWForm content, Hash headers, IProgress<float> progress = null) {
             var contentHeaders = content.headers;
             return ObservableUnity.FromCoroutine<string>((observer, cancellation) => FetchText(new WWW(url, content.data, MergeHash(contentHeaders, headers)), observer, progress, cancellation));
         }
 
-        public static IObservable<byte[]> PostAndGetBytes(string url, byte[] postData, IProgress<float> progress = null)
-        {
+        public static IObservable<byte[]> PostAndGetBytes(string url, byte[] postData, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<byte[]>((observer, cancellation) => FetchBytes(new WWW(url, postData), observer, progress, cancellation));
         }
 
-        public static IObservable<byte[]> PostAndGetBytes(string url, byte[] postData, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<byte[]> PostAndGetBytes(string url, byte[] postData, Hash headers, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<byte[]>((observer, cancellation) => FetchBytes(new WWW(url, postData, headers), observer, progress, cancellation));
         }
 
-        public static IObservable<byte[]> PostAndGetBytes(string url, WWWForm content, IProgress<float> progress = null)
-        {
+        public static IObservable<byte[]> PostAndGetBytes(string url, WWWForm content, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<byte[]>((observer, cancellation) => FetchBytes(new WWW(url, content), observer, progress, cancellation));
         }
 
-        public static IObservable<byte[]> PostAndGetBytes(string url, WWWForm content, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<byte[]> PostAndGetBytes(string url, WWWForm content, Hash headers, IProgress<float> progress = null) {
             var contentHeaders = content.headers;
             return ObservableUnity.FromCoroutine<byte[]>((observer, cancellation) => FetchBytes(new WWW(url, content.data, MergeHash(contentHeaders, headers)), observer, progress, cancellation));
         }
 
-        public static IObservable<WWW> PostWWW(string url, byte[] postData, IProgress<float> progress = null)
-        {
+        public static IObservable<WWW> PostWWW(string url, byte[] postData, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<WWW>((observer, cancellation) => Fetch(new WWW(url, postData), observer, progress, cancellation));
         }
 
-        public static IObservable<WWW> PostWWW(string url, byte[] postData, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<WWW> PostWWW(string url, byte[] postData, Hash headers, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<WWW>((observer, cancellation) => Fetch(new WWW(url, postData, headers), observer, progress, cancellation));
         }
 
-        public static IObservable<WWW> PostWWW(string url, WWWForm content, IProgress<float> progress = null)
-        {
+        public static IObservable<WWW> PostWWW(string url, WWWForm content, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<WWW>((observer, cancellation) => Fetch(new WWW(url, content), observer, progress, cancellation));
         }
 
-        public static IObservable<WWW> PostWWW(string url, WWWForm content, Hash headers, IProgress<float> progress = null)
-        {
+        public static IObservable<WWW> PostWWW(string url, WWWForm content, Hash headers, IProgress<float> progress = null) {
             var contentHeaders = content.headers;
             return ObservableUnity.FromCoroutine<WWW>((observer, cancellation) => Fetch(new WWW(url, content.data, MergeHash(contentHeaders, headers)), observer, progress, cancellation));
         }
 
-        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, int version, IProgress<float> progress = null)
-        {
+        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, int version, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<AssetBundle>((observer, cancellation) => FetchAssetBundle(WWW.LoadFromCacheOrDownload(url, version), observer, progress, cancellation));
         }
 
-        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, int version, uint crc, IProgress<float> progress = null)
-        {
+        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, int version, uint crc, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<AssetBundle>((observer, cancellation) => FetchAssetBundle(WWW.LoadFromCacheOrDownload(url, version, crc), observer, progress, cancellation));
         }
 
         // over Unity5 supports Hash128
 #if !(UNITY_4_7 || UNITY_4_6 || UNITY_4_5 || UNITY_4_4 || UNITY_4_3 || UNITY_4_2 || UNITY_4_1 || UNITY_4_0_1 || UNITY_4_0 || UNITY_3_5 || UNITY_3_4 || UNITY_3_3 || UNITY_3_2 || UNITY_3_1 || UNITY_3_0_0 || UNITY_3_0 || UNITY_2_6_1 || UNITY_2_6)
-        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, Hash128 hash128, IProgress<float> progress = null)
-        {
+        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, Hash128 hash128, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<AssetBundle>((observer, cancellation) => FetchAssetBundle(WWW.LoadFromCacheOrDownload(url, hash128), observer, progress, cancellation));
         }
 
-        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, Hash128 hash128, uint crc, IProgress<float> progress = null)
-        {
+        public static IObservable<AssetBundle> LoadFromCacheOrDownload(string url, Hash128 hash128, uint crc, IProgress<float> progress = null) {
             return ObservableUnity.FromCoroutine<AssetBundle>((observer, cancellation) => FetchAssetBundle(WWW.LoadFromCacheOrDownload(url, hash128, crc), observer, progress, cancellation));
         }
 #endif
@@ -149,242 +128,168 @@ namespace UniRx
             return newHeaders;
         }
 #else
-        static Hash MergeHash(Hash wwwFormHeaders, Hash externalHeaders)
-        {
-            foreach (HashEntry item in externalHeaders)
-            {
+        static Hash MergeHash(Hash wwwFormHeaders, Hash externalHeaders) {
+            foreach (HashEntry item in externalHeaders) {
                 wwwFormHeaders[item.Key] = item.Value;
             }
             return wwwFormHeaders;
         }
 #endif
 
-        static IEnumerator Fetch(WWW www, IObserver<WWW> observer, IProgress<float> reportProgress, CancellationToken cancel)
-        {
-            using (www)
-            {
-                if (reportProgress != null)
-                {
-                    while (!www.isDone && !cancel.IsCancellationRequested)
-                    {
-                        try
-                        {
+        static IEnumerator Fetch(WWW www, IObserver<WWW> observer, IProgress<float> reportProgress, CancellationToken cancel) {
+            using (www) {
+                if (reportProgress != null) {
+                    while (!www.isDone && !cancel.IsCancellationRequested) {
+                        try {
                             reportProgress.Report(www.progress);
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             observer.OnError(ex);
                             yield break;
                         }
                         yield return null;
                     }
-                }
-                else
-                {
-                    if (!www.isDone)
-                    {
+                } else {
+                    if (!www.isDone) {
                         yield return www;
                     }
                 }
 
-                if (cancel.IsCancellationRequested)
-                {
+                if (cancel.IsCancellationRequested) {
                     yield break;
                 }
 
-                if (reportProgress != null)
-                {
-                    try
-                    {
+                if (reportProgress != null) {
+                    try {
                         reportProgress.Report(www.progress);
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         observer.OnError(ex);
                         yield break;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(www.error))
-                {
+                if (!string.IsNullOrEmpty(www.error)) {
                     observer.OnError(new WWWErrorException(www, www.text));
-                }
-                else
-                {
+                } else {
                     observer.OnNext(www);
                     observer.OnCompleted();
                 }
             }
         }
 
-        static IEnumerator FetchText(WWW www, IObserver<string> observer, IProgress<float> reportProgress, CancellationToken cancel)
-        {
-            using (www)
-            {
-                if (reportProgress != null)
-                {
-                    while (!www.isDone && !cancel.IsCancellationRequested)
-                    {
-                        try
-                        {
+        static IEnumerator FetchText(WWW www, IObserver<string> observer, IProgress<float> reportProgress, CancellationToken cancel) {
+            using (www) {
+                if (reportProgress != null) {
+                    while (!www.isDone && !cancel.IsCancellationRequested) {
+                        try {
                             reportProgress.Report(www.progress);
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             observer.OnError(ex);
                             yield break;
                         }
                         yield return null;
                     }
-                }
-                else
-                {
-                    if (!www.isDone)
-                    {
+                } else {
+                    if (!www.isDone) {
                         yield return www;
                     }
                 }
 
-                if (cancel.IsCancellationRequested)
-                {
+                if (cancel.IsCancellationRequested) {
                     yield break;
                 }
 
-                if (reportProgress != null)
-                {
-                    try
-                    {
+                if (reportProgress != null) {
+                    try {
                         reportProgress.Report(www.progress);
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         observer.OnError(ex);
                         yield break;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(www.error))
-                {
+                if (!string.IsNullOrEmpty(www.error)) {
                     observer.OnError(new WWWErrorException(www, www.text));
-                }
-                else
-                {
+                } else {
                     observer.OnNext(www.text);
                     observer.OnCompleted();
                 }
             }
         }
 
-        static IEnumerator FetchBytes(WWW www, IObserver<byte[]> observer, IProgress<float> reportProgress, CancellationToken cancel)
-        {
-            using (www)
-            {
-                if (reportProgress != null)
-                {
-                    while (!www.isDone && !cancel.IsCancellationRequested)
-                    {
-                        try
-                        {
+        static IEnumerator FetchBytes(WWW www, IObserver<byte[]> observer, IProgress<float> reportProgress, CancellationToken cancel) {
+            using (www) {
+                if (reportProgress != null) {
+                    while (!www.isDone && !cancel.IsCancellationRequested) {
+                        try {
                             reportProgress.Report(www.progress);
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             observer.OnError(ex);
                             yield break;
                         }
                         yield return null;
                     }
-                }
-                else
-                {
-                    if (!www.isDone)
-                    {
+                } else {
+                    if (!www.isDone) {
                         yield return www;
                     }
                 }
 
-                if (cancel.IsCancellationRequested)
-                {
+                if (cancel.IsCancellationRequested) {
                     yield break;
                 }
 
-                if (reportProgress != null)
-                {
-                    try
-                    {
+                if (reportProgress != null) {
+                    try {
                         reportProgress.Report(www.progress);
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         observer.OnError(ex);
                         yield break;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(www.error))
-                {
+                if (!string.IsNullOrEmpty(www.error)) {
                     observer.OnError(new WWWErrorException(www, www.text));
-                }
-                else
-                {
+                } else {
                     observer.OnNext(www.bytes);
                     observer.OnCompleted();
                 }
             }
         }
 
-        static IEnumerator FetchAssetBundle(WWW www, IObserver<AssetBundle> observer, IProgress<float> reportProgress, CancellationToken cancel)
-        {
-            using (www)
-            {
-                if (reportProgress != null)
-                {
-                    while (!www.isDone && !cancel.IsCancellationRequested)
-                    {
-                        try
-                        {
+        static IEnumerator FetchAssetBundle(WWW www, IObserver<AssetBundle> observer, IProgress<float> reportProgress, CancellationToken cancel) {
+            using (www) {
+                if (reportProgress != null) {
+                    while (!www.isDone && !cancel.IsCancellationRequested) {
+                        try {
                             reportProgress.Report(www.progress);
-                        }
-                        catch (Exception ex)
-                        {
+                        } catch (Exception ex) {
                             observer.OnError(ex);
                             yield break;
                         }
                         yield return null;
                     }
-                }
-                else
-                {
-                    if (!www.isDone)
-                    {
+                } else {
+                    if (!www.isDone) {
                         yield return www;
                     }
                 }
 
-                if (cancel.IsCancellationRequested)
-                {
+                if (cancel.IsCancellationRequested) {
                     yield break;
                 }
 
-                if (reportProgress != null)
-                {
-                    try
-                    {
+                if (reportProgress != null) {
+                    try {
                         reportProgress.Report(www.progress);
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         observer.OnError(ex);
                         yield break;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(www.error))
-                {
+                if (!string.IsNullOrEmpty(www.error)) {
                     observer.OnError(new WWWErrorException(www, ""));
-                }
-                else
-                {
+                } else {
                     observer.OnNext(www.assetBundle);
                     observer.OnCompleted();
                 }
@@ -392,8 +297,7 @@ namespace UniRx
         }
     }
 
-    public class WWWErrorException : Exception
-    {
+    public class WWWErrorException : Exception {
         public string RawErrorMessage { get; private set; }
         public bool HasResponse { get; private set; }
         public string Text { get; private set; }
@@ -402,8 +306,7 @@ namespace UniRx
         public WWW WWW { get; private set; }
 
         // cache the text because if www was disposed, can't access it.
-        public WWWErrorException(WWW www, string text)
-        {
+        public WWWErrorException(WWW www, string text) {
             this.WWW = www;
             this.RawErrorMessage = www.error;
             this.ResponseHeaders = www.responseHeaders;
@@ -411,26 +314,20 @@ namespace UniRx
             this.Text = text;
 
             var splitted = RawErrorMessage.Split(' ', ':');
-            if (splitted.Length != 0)
-            {
+            if (splitted.Length != 0) {
                 int statusCode;
-                if (int.TryParse(splitted[0], out statusCode))
-                {
+                if (int.TryParse(splitted[0], out statusCode)) {
                     this.HasResponse = true;
                     this.StatusCode = (System.Net.HttpStatusCode)statusCode;
                 }
             }
         }
 
-        public override string ToString()
-        {
+        public override string ToString() {
             var text = this.Text;
-            if (string.IsNullOrEmpty(text))
-            {
+            if (string.IsNullOrEmpty(text)) {
                 return RawErrorMessage;
-            }
-            else
-            {
+            } else {
                 return RawErrorMessage + " " + text;
             }
         }

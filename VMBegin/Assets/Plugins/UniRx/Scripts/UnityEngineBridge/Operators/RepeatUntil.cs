@@ -3,29 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UniRx.Operators
-{
-    internal class RepeatUntilObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class RepeatUntilObservable<T> : OperatorObservableBase<T> {
         readonly IEnumerable<IObservable<T>> sources;
         readonly IObservable<Unit> trigger;
         readonly GameObject lifeTimeChecker;
 
         public RepeatUntilObservable(IEnumerable<IObservable<T>> sources, IObservable<Unit> trigger, GameObject lifeTimeChecker)
-            : base(true)
-        {
+            : base(true) {
             this.sources = sources;
             this.trigger = trigger;
             this.lifeTimeChecker = lifeTimeChecker;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             return new RepeatUntil(this, observer, cancel).Run();
         }
 
-        class RepeatUntil : OperatorObserverBase<T, T>
-        {
+        class RepeatUntil : OperatorObserverBase<T, T> {
             readonly RepeatUntilObservable<T> parent;
             readonly object gate = new object();
 
@@ -38,13 +33,11 @@ namespace UniRx.Operators
             bool isFirstSubscribe;
             IDisposable stopper;
 
-            public RepeatUntil(RepeatUntilObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public RepeatUntil(RepeatUntilObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 isFirstSubscribe = true;
                 isDisposed = false;
                 isStopped = false;
@@ -52,10 +45,8 @@ namespace UniRx.Operators
                 subscription = new SerialDisposable();
                 schedule = new SingleAssignmentDisposable();
 
-                stopper = parent.trigger.Subscribe(_ =>
-                {
-                    lock (gate)
-                    {
+                stopper = parent.trigger.Subscribe(_ => {
+                    lock (gate) {
                         isStopped = true;
                         e.Dispose();
                         subscription.Dispose();
@@ -66,20 +57,16 @@ namespace UniRx.Operators
 
                 schedule.Disposable = Scheduler.CurrentThread.Schedule(RecursiveRun);
 
-                return new CompositeDisposable(schedule, subscription, stopper, Disposable.Create(() =>
-                {
-                    lock (gate)
-                    {
+                return new CompositeDisposable(schedule, subscription, stopper, Disposable.Create(() => {
+                    lock (gate) {
                         isDisposed = true;
                         e.Dispose();
                     }
                 }));
             }
 
-            void RecursiveRun(Action self)
-            {
-                lock (gate)
-                {
+            void RecursiveRun(Action self) {
+                lock (gate) {
                     this.nextSelf = self;
                     if (isDisposed) return;
                     if (isStopped) return;
@@ -88,34 +75,26 @@ namespace UniRx.Operators
                     var hasNext = false;
                     var ex = default(Exception);
 
-                    try
-                    {
+                    try {
                         hasNext = e.MoveNext();
-                        if (hasNext)
-                        {
+                        if (hasNext) {
                             current = e.Current;
                             if (current == null) throw new InvalidOperationException("sequence is null.");
-                        }
-                        else
-                        {
+                        } else {
                             e.Dispose();
                         }
-                    }
-                    catch (Exception exception)
-                    {
+                    } catch (Exception exception) {
                         ex = exception;
                         e.Dispose();
                     }
 
-                    if (ex != null)
-                    {
+                    if (ex != null) {
                         stopper.Dispose();
                         observer.OnError(ex);
                         return;
                     }
 
-                    if (!hasNext)
-                    {
+                    if (!hasNext) {
                         stopper.Dispose();
                         observer.OnCompleted();
                         return;
@@ -125,51 +104,37 @@ namespace UniRx.Operators
                     var d = new SingleAssignmentDisposable();
                     subscription.Disposable = d;
 
-                    if (isFirstSubscribe)
-                    {
+                    if (isFirstSubscribe) {
                         isFirstSubscribe = false;
                         d.Disposable = source.Subscribe(this);
-                    }
-                    else
-                    {
+                    } else {
                         MainThreadDispatcher.SendStartCoroutine(SubscribeAfterEndOfFrame(d, source, this, parent.lifeTimeChecker));
                     }
                 }
             }
 
-            static IEnumerator SubscribeAfterEndOfFrame(SingleAssignmentDisposable d, IObservable<T> source, IObserver<T> observer, GameObject lifeTimeChecker)
-            {
+            static IEnumerator SubscribeAfterEndOfFrame(SingleAssignmentDisposable d, IObservable<T> source, IObserver<T> observer, GameObject lifeTimeChecker) {
                 yield return YieldInstructionCache.WaitForEndOfFrame;
-                if (!d.IsDisposed && lifeTimeChecker != null)
-                {
+                if (!d.IsDisposed && lifeTimeChecker != null) {
                     d.Disposable = source.Subscribe(observer);
                 }
             }
 
-            public override void OnNext(T value)
-            {
+            public override void OnNext(T value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                if (!isDisposed)
-                {
+            public override void OnCompleted() {
+                if (!isDisposed) {
                     this.nextSelf();
-                }
-                else
-                {
+                } else {
                     e.Dispose();
-                    if (!isDisposed)
-                    {
-                        try { observer.OnCompleted(); }
-                        finally { Dispose(); }
+                    if (!isDisposed) {
+                        try { observer.OnCompleted(); } finally { Dispose(); }
                     }
                 }
             }

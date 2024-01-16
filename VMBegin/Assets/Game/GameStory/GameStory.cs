@@ -1,6 +1,4 @@
-using Game.Shared.DataModels;
 using Game.Shared.Interfaces;
-using GameScrypt.JsonData;
 using UnityEngine;
 
 namespace Game.Story {
@@ -15,6 +13,6 @@ namespace Game.Story {
         public IStoryData GetStoryData() {
             Debug.Log("GetStoryData");
             return _storyJsonLink.GetStoryData();
-        }   
+        }
     }
 }

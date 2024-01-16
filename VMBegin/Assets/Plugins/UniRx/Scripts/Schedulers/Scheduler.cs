@@ -1,74 +1,57 @@
 ﻿using System;
 
-namespace UniRx
-{
+namespace UniRx {
     // Scheduler Extension
-    public static partial class Scheduler
-    {
+    public static partial class Scheduler {
         // configurable defaults
-        public static class DefaultSchedulers
-        {
+        public static class DefaultSchedulers {
             static IScheduler constantTime;
-            public static IScheduler ConstantTimeOperations
-            {
-                get
-                {
+            public static IScheduler ConstantTimeOperations {
+                get {
                     return constantTime ?? (constantTime = Scheduler.Immediate);
                 }
-                set
-                {
+                set {
                     constantTime = value;
                 }
             }
 
             static IScheduler tailRecursion;
-            public static IScheduler TailRecursion
-            {
-                get
-                {
+            public static IScheduler TailRecursion {
+                get {
                     return tailRecursion ?? (tailRecursion = Scheduler.Immediate);
                 }
-                set
-                {
+                set {
                     tailRecursion = value;
                 }
             }
 
             static IScheduler iteration;
-            public static IScheduler Iteration
-            {
-                get
-                {
+            public static IScheduler Iteration {
+                get {
                     return iteration ?? (iteration = Scheduler.CurrentThread);
                 }
-                set
-                {
+                set {
                     iteration = value;
                 }
             }
 
             static IScheduler timeBasedOperations;
-            public static IScheduler TimeBasedOperations
-            {
-                get
-                {
+            public static IScheduler TimeBasedOperations {
+                get {
 #if UniRxLibrary
                     return timeBasedOperations ?? (timeBasedOperations = Scheduler.ThreadPool);
 #else
                     return timeBasedOperations ?? (timeBasedOperations = Scheduler.MainThread); // MainThread as default for TimeBased Operation
 #endif
                 }
-                set
-                {
+                set {
                     timeBasedOperations = value;
                 }
             }
 
             static IScheduler asyncConversions;
-            public static IScheduler AsyncConversions
-            {
-                get
-                {
+            public static IScheduler AsyncConversions {
+                get {
 #if WEB_GL
                     // WebGL does not support threadpool
                     return asyncConversions ?? (asyncConversions = Scheduler.MainThread);
@@ -76,14 +59,12 @@ namespace UniRx
                     return asyncConversions ?? (asyncConversions = Scheduler.ThreadPool);
 #endif
                 }
-                set
-                {
+                set {
                     asyncConversions = value;
                 }
             }
 
-            public static void SetDotNetCompatible()
-            {
+            public static void SetDotNetCompatible() {
                 ConstantTimeOperations = Scheduler.Immediate;
                 TailRecursion = Scheduler.Immediate;
                 Iteration = Scheduler.CurrentThread;
@@ -94,37 +75,30 @@ namespace UniRx
 
         // utils
 
-        public static DateTimeOffset Now
-        {
+        public static DateTimeOffset Now {
             get { return DateTimeOffset.UtcNow; }
         }
 
-        public static TimeSpan Normalize(TimeSpan timeSpan)
-        {
+        public static TimeSpan Normalize(TimeSpan timeSpan) {
             return timeSpan >= TimeSpan.Zero ? timeSpan : TimeSpan.Zero;
         }
 
-        public static IDisposable Schedule(this IScheduler scheduler, DateTimeOffset dueTime, Action action)
-        {
+        public static IDisposable Schedule(this IScheduler scheduler, DateTimeOffset dueTime, Action action) {
             return scheduler.Schedule(dueTime - scheduler.Now, action);
         }
 
-        public static IDisposable Schedule(this IScheduler scheduler, Action<Action> action)
-        {
+        public static IDisposable Schedule(this IScheduler scheduler, Action<Action> action) {
             // InvokeRec1
             var group = new CompositeDisposable(1);
             var gate = new object();
 
             Action recursiveAction = null;
-            recursiveAction = () => action(() =>
-            {
+            recursiveAction = () => action(() => {
                 var isAdded = false;
                 var isDone = false;
                 var d = default(IDisposable);
-                d = scheduler.Schedule(() =>
-                {
-                    lock (gate)
-                    {
+                d = scheduler.Schedule(() => {
+                    lock (gate) {
                         if (isAdded)
                             group.Remove(d);
                         else
@@ -133,10 +107,8 @@ namespace UniRx
                     recursiveAction();
                 });
 
-                lock (gate)
-                {
-                    if (!isDone)
-                    {
+                lock (gate) {
+                    if (!isDone) {
                         group.Add(d);
                         isAdded = true;
                     }
@@ -148,23 +120,19 @@ namespace UniRx
             return group;
         }
 
-        public static IDisposable Schedule(this IScheduler scheduler, TimeSpan dueTime, Action<Action<TimeSpan>> action)
-        {
+        public static IDisposable Schedule(this IScheduler scheduler, TimeSpan dueTime, Action<Action<TimeSpan>> action) {
             // InvokeRec2
 
             var group = new CompositeDisposable(1);
             var gate = new object();
 
             Action recursiveAction = null;
-            recursiveAction = () => action(dt =>
-            {
+            recursiveAction = () => action(dt => {
                 var isAdded = false;
                 var isDone = false;
                 var d = default(IDisposable);
-                d = scheduler.Schedule(dt, () =>
-                {
-                    lock (gate)
-                    {
+                d = scheduler.Schedule(dt, () => {
+                    lock (gate) {
                         if (isAdded)
                             group.Remove(d);
                         else
@@ -173,10 +141,8 @@ namespace UniRx
                     recursiveAction();
                 });
 
-                lock (gate)
-                {
-                    if (!isDone)
-                    {
+                lock (gate) {
+                    if (!isDone) {
                         group.Add(d);
                         isAdded = true;
                     }
@@ -188,23 +154,19 @@ namespace UniRx
             return group;
         }
 
-        public static IDisposable Schedule(this IScheduler scheduler, DateTimeOffset dueTime, Action<Action<DateTimeOffset>> action)
-        {
+        public static IDisposable Schedule(this IScheduler scheduler, DateTimeOffset dueTime, Action<Action<DateTimeOffset>> action) {
             // InvokeRec3
 
             var group = new CompositeDisposable(1);
             var gate = new object();
 
             Action recursiveAction = null;
-            recursiveAction = () => action(dt =>
-            {
+            recursiveAction = () => action(dt => {
                 var isAdded = false;
                 var isDone = false;
                 var d = default(IDisposable);
-                d = scheduler.Schedule(dt, () =>
-                {
-                    lock (gate)
-                    {
+                d = scheduler.Schedule(dt, () => {
+                    lock (gate) {
                         if (isAdded)
                             group.Remove(d);
                         else
@@ -213,10 +175,8 @@ namespace UniRx
                     recursiveAction();
                 });
 
-                lock (gate)
-                {
-                    if (!isDone)
-                    {
+                lock (gate) {
+                    if (!isDone) {
                         group.Add(d);
                         isAdded = true;
                     }

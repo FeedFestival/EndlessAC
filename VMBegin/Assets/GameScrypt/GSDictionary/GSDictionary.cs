@@ -10,18 +10,14 @@ using UnityEditorInternal;
 #endif
 
 
-namespace GameScrypt.GSDictionary
-{
+namespace GameScrypt.GSDictionary {
     [Serializable]
-    public class UDictionary
-    {
-        public class SplitAttribute : PropertyAttribute
-        {
+    public class UDictionary {
+        public class SplitAttribute : PropertyAttribute {
             public float Key { get; protected set; }
             public float Value { get; protected set; }
 
-            public SplitAttribute(float key, float value)
-            {
+            public SplitAttribute(float key, float value) {
                 this.Key = key;
                 this.Value = value;
             }
@@ -30,12 +26,10 @@ namespace GameScrypt.GSDictionary
 #if UNITY_EDITOR
         [CustomPropertyDrawer(typeof(SplitAttribute), true)]
         [CustomPropertyDrawer(typeof(UDictionary), true)]
-        public class Drawer : PropertyDrawer
-        {
+        public class Drawer : PropertyDrawer {
             SerializedProperty property;
 
-            public bool IsExpanded
-            {
+            public bool IsExpanded {
                 get => property.isExpanded;
                 set => property.isExpanded = value;
             }
@@ -63,8 +57,7 @@ namespace GameScrypt.GSDictionary
             public const float TopPadding = 5f;
             public const float BottomPadding = 5f;
 
-            void Init(SerializedProperty value)
-            {
+            void Init(SerializedProperty value) {
                 if (SerializedProperty.EqualContents(value, property)) return;
 
                 property = value;
@@ -88,8 +81,7 @@ namespace GameScrypt.GSDictionary
                 list.onReorderCallbackWithDetails += Reorder;
             }
 
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            {
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
                 Init(property);
 
                 var height = TopPadding + BottomPadding;
@@ -102,8 +94,7 @@ namespace GameScrypt.GSDictionary
                 return height;
             }
 
-            public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label)
-            {
+            public override void OnGUI(Rect rect, SerializedProperty property, GUIContent label) {
                 label.text = $" {label.text}";
 
                 this.label = label;
@@ -115,8 +106,7 @@ namespace GameScrypt.GSDictionary
                 rect.y += TopPadding;
                 rect.height -= TopPadding + BottomPadding;
 
-                if (IsAligned == false)
-                {
+                if (IsAligned == false) {
                     DrawAlignmentWarning(ref rect);
                     return;
                 }
@@ -127,16 +117,14 @@ namespace GameScrypt.GSDictionary
                     DrawCompleteHeader(ref rect);
             }
 
-            void DrawList(ref Rect rect)
-            {
+            void DrawList(ref Rect rect) {
                 EditorGUIUtility.labelWidth = 80f;
                 EditorGUIUtility.fieldWidth = 80f;
 
                 list.DoList(rect);
             }
 
-            void DrawAlignmentWarning(ref Rect rect)
-            {
+            void DrawAlignmentWarning(ref Rect rect) {
                 var width = 80f;
                 var spacing = 5f;
 
@@ -147,17 +135,13 @@ namespace GameScrypt.GSDictionary
                 rect.x += rect.width + spacing;
                 rect.width = width - spacing;
 
-                if (GUI.Button(rect, "Fix"))
-                {
-                    if (keys.arraySize > values.arraySize)
-                    {
+                if (GUI.Button(rect, "Fix")) {
+                    if (keys.arraySize > values.arraySize) {
                         var difference = keys.arraySize - values.arraySize;
 
                         for (int i = 0; i < difference; i++)
                             keys.DeleteArrayElementAtIndex(keys.arraySize - 1);
-                    }
-                    else if (keys.arraySize < values.arraySize)
-                    {
+                    } else if (keys.arraySize < values.arraySize) {
                         var difference = values.arraySize - keys.arraySize;
 
                         for (int i = 0; i < difference; i++)
@@ -167,15 +151,13 @@ namespace GameScrypt.GSDictionary
             }
 
             #region Draw Header
-            void DrawHeader(Rect rect)
-            {
+            void DrawHeader(Rect rect) {
                 rect.x += 10f;
 
                 IsExpanded = EditorGUI.Foldout(rect, IsExpanded, label, true);
             }
 
-            void DrawCompleteHeader(ref Rect rect)
-            {
+            void DrawCompleteHeader(ref Rect rect) {
                 ReorderableList.defaultBehaviours.DrawHeaderBackground(rect);
 
                 rect.x += 6;
@@ -185,8 +167,7 @@ namespace GameScrypt.GSDictionary
             }
             #endregion
 
-            float GetElementHeight(int index)
-            {
+            float GetElementHeight(int index) {
                 SerializedProperty key = keys.GetArrayElementAtIndex(index);
                 SerializedProperty value = values.GetArrayElementAtIndex(index);
 
@@ -201,8 +182,7 @@ namespace GameScrypt.GSDictionary
             }
 
             #region Draw Element
-            void DrawElement(Rect rect, int index, bool isActive, bool isFocused)
-            {
+            void DrawElement(Rect rect, int index, bool isActive, bool isFocused) {
                 rect.height -= ElementHeightPadding;
                 rect.y += ElementHeightPadding / 2;
 
@@ -212,8 +192,7 @@ namespace GameScrypt.GSDictionary
                 DrawValue(areas[1], index);
             }
 
-            void DrawKey(Rect rect, int index)
-            {
+            void DrawKey(Rect rect, int index) {
                 var property = keys.GetArrayElementAtIndex(index);
 
                 rect.x += ElementSpacing / 2f;
@@ -222,8 +201,7 @@ namespace GameScrypt.GSDictionary
                 DrawField(rect, property);
             }
 
-            void DrawValue(Rect rect, int index)
-            {
+            void DrawValue(Rect rect, int index) {
                 var property = values.GetArrayElementAtIndex(index);
 
                 rect.x += ElementSpacing / 2f;
@@ -232,21 +210,16 @@ namespace GameScrypt.GSDictionary
                 DrawField(rect, property);
             }
 
-            void DrawField(Rect rect, SerializedProperty property)
-            {
+            void DrawField(Rect rect, SerializedProperty property) {
                 rect.height = SingleLineHeight;
 
-                if (IsInline(property))
-                {
+                if (IsInline(property)) {
                     EditorGUI.PropertyField(rect, property, GUIContent.none);
-                }
-                else
-                {
+                } else {
                     rect.x += ElementSpacing / 2f;
                     rect.width -= ElementSpacing;
 
-                    foreach (var child in IterateChildern(property))
-                    {
+                    foreach (var child in IterateChildern(property)) {
                         EditorGUI.PropertyField(rect, child, false);
 
                         rect.y += SingleLineHeight + +2f;
@@ -255,34 +228,29 @@ namespace GameScrypt.GSDictionary
             }
             #endregion
 
-            void Reorder(ReorderableList list, int oldIndex, int newIndex)
-            {
+            void Reorder(ReorderableList list, int oldIndex, int newIndex) {
                 values.MoveArrayElement(oldIndex, newIndex);
             }
 
-            void Add(ReorderableList list)
-            {
+            void Add(ReorderableList list) {
                 values.InsertArrayElementAtIndex(values.arraySize);
 
                 ReorderableList.defaultBehaviours.DoAddButton(list);
             }
 
-            void Remove(ReorderableList list)
-            {
+            void Remove(ReorderableList list) {
                 values.DeleteArrayElementAtIndex(list.index);
 
                 ReorderableList.defaultBehaviours.DoRemoveButton(list);
             }
 
             //Static Utility
-            static Rect[] Split(Rect source, params float[] cuts)
-            {
+            static Rect[] Split(Rect source, params float[] cuts) {
                 var rects = new Rect[cuts.Length];
 
                 var x = 0f;
 
-                for (int i = 0; i < cuts.Length; i++)
-                {
+                for (int i = 0; i < cuts.Length; i++) {
                     rects[i] = new Rect(source);
 
                     rects[i].x += x;
@@ -294,10 +262,8 @@ namespace GameScrypt.GSDictionary
                 return rects;
             }
 
-            static bool IsInline(SerializedProperty property)
-            {
-                switch (property.propertyType)
-                {
+            static bool IsInline(SerializedProperty property) {
+                switch (property.propertyType) {
                     case SerializedPropertyType.Generic:
                         return property.hasVisibleChildren == false;
                 }
@@ -305,14 +271,12 @@ namespace GameScrypt.GSDictionary
                 return true;
             }
 
-            static IEnumerable<SerializedProperty> IterateChildern(SerializedProperty property)
-            {
+            static IEnumerable<SerializedProperty> IterateChildern(SerializedProperty property) {
                 var path = property.propertyPath;
 
                 property.Next(true);
 
-                while (true)
-                {
+                while (true) {
                     yield return property;
 
                     if (property.NextVisible(false) == false) break;
@@ -320,8 +284,7 @@ namespace GameScrypt.GSDictionary
                 }
             }
 
-            float GetChildernSingleHeight(SerializedProperty property)
-            {
+            float GetChildernSingleHeight(SerializedProperty property) {
                 if (IsInline(property)) return SingleLineHeight;
 
                 var height = 0f;
@@ -336,8 +299,7 @@ namespace GameScrypt.GSDictionary
     }
 
     [Serializable]
-    public class UDictionary<TKey, TValue> : UDictionary, IDictionary<TKey, TValue>
-    {
+    public class UDictionary<TKey, TValue> : UDictionary, IDictionary<TKey, TValue> {
         [SerializeField]
         List<TKey> keys;
         public List<TKey> Keys => keys;
@@ -356,16 +318,12 @@ namespace GameScrypt.GSDictionary
 
         public bool Cached => cache != null;
 
-        public Dictionary<TKey, TValue> Dictionary
-        {
-            get
-            {
-                if (cache == null)
-                {
+        public Dictionary<TKey, TValue> Dictionary {
+            get {
+                if (cache == null) {
                     cache = new Dictionary<TKey, TValue>();
 
-                    for (int i = 0; i < keys.Count; i++)
-                    {
+                    for (int i = 0; i < keys.Count; i++) {
                         if (keys[i] == null) continue;
                         if (cache.ContainsKey(keys[i])) continue;
 
@@ -377,19 +335,14 @@ namespace GameScrypt.GSDictionary
             }
         }
 
-        public TValue this[TKey key]
-        {
+        public TValue this[TKey key] {
             get => Dictionary[key];
-            set
-            {
+            set {
                 var index = keys.IndexOf(key);
 
-                if (index < 0)
-                {
+                if (index < 0) {
                     Add(key, value);
-                }
-                else
-                {
+                } else {
                     values[index] = value;
                     if (Cached) Dictionary[key] = value;
                 }
@@ -401,8 +354,7 @@ namespace GameScrypt.GSDictionary
         public bool ContainsKey(TKey key) => Dictionary.ContainsKey(key);
         public bool Contains(KeyValuePair<TKey, TValue> item) => ContainsKey(item.Key);
 
-        public void Add(TKey key, TValue value)
-        {
+        public void Add(TKey key, TValue value) {
             keys.Add(key);
             values.Add(value);
 
@@ -410,8 +362,7 @@ namespace GameScrypt.GSDictionary
         }
         public void Add(KeyValuePair<TKey, TValue> item) => Add(item.Key, item.Value);
 
-        public bool Remove(TKey key)
-        {
+        public bool Remove(TKey key) {
             var index = keys.IndexOf(key);
 
             if (index < 0) return false;
@@ -425,8 +376,7 @@ namespace GameScrypt.GSDictionary
         }
         public bool Remove(KeyValuePair<TKey, TValue> item) => Remove(item.Key);
 
-        public void Clear()
-        {
+        public void Clear() {
             keys.Clear();
             values.Clear();
 
@@ -438,8 +388,7 @@ namespace GameScrypt.GSDictionary
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => Dictionary.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => Dictionary.GetEnumerator();
 
-        public UDictionary()
-        {
+        public UDictionary() {
             values = new List<TValue>();
             keys = new List<TKey>();
         }

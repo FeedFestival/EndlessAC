@@ -1,62 +1,47 @@
 ﻿using System;
 
-namespace UniRx
-{
-    public sealed class MultipleAssignmentDisposable : IDisposable, ICancelable
-    {
+namespace UniRx {
+    public sealed class MultipleAssignmentDisposable : IDisposable, ICancelable {
         static readonly BooleanDisposable True = new BooleanDisposable(true);
 
         object gate = new object();
         IDisposable current;
 
-        public bool IsDisposed
-        {
-            get
-            {
-                lock (gate)
-                {
+        public bool IsDisposed {
+            get {
+                lock (gate) {
                     return current == True;
                 }
             }
         }
 
-        public IDisposable Disposable
-        {
-            get
-            {
-                lock (gate)
-                {
+        public IDisposable Disposable {
+            get {
+                lock (gate) {
                     return (current == True)
                         ? UniRx.Disposable.Empty
                         : current;
                 }
             }
-            set
-            {
+            set {
                 var shouldDispose = false;
-                lock (gate)
-                {
+                lock (gate) {
                     shouldDispose = (current == True);
-                    if (!shouldDispose)
-                    {
+                    if (!shouldDispose) {
                         current = value;
                     }
                 }
-                if (shouldDispose && value != null)
-                {
+                if (shouldDispose && value != null) {
                     value.Dispose();
                 }
             }
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             IDisposable old = null;
 
-            lock (gate)
-            {
-                if (current != True)
-                {
+            lock (gate) {
+                if (current != True) {
                     old = current;
                     current = True;
                 }

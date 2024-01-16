@@ -1,14 +1,11 @@
 ﻿using System;
 
-namespace UniRx.Operators
-{
-    public abstract class OperatorObserverBase<TSource, TResult> : IDisposable, IObserver<TSource>
-    {
+namespace UniRx.Operators {
+    public abstract class OperatorObserverBase<TSource, TResult> : IDisposable, IObserver<TSource> {
         protected internal volatile IObserver<TResult> observer;
         IDisposable cancel;
 
-        public OperatorObserverBase(IObserver<TResult> observer, IDisposable cancel)
-        {
+        public OperatorObserverBase(IObserver<TResult> observer, IDisposable cancel) {
             this.observer = observer;
             this.cancel = cancel;
         }
@@ -19,12 +16,10 @@ namespace UniRx.Operators
 
         public abstract void OnCompleted();
 
-        public void Dispose()
-        {
+        public void Dispose() {
             observer = UniRx.InternalUtil.EmptyObserver<TResult>.Instance;
             var target = System.Threading.Interlocked.Exchange(ref cancel, null);
-            if (target != null)
-            {
+            if (target != null) {
                 target.Dispose();
             }
         }

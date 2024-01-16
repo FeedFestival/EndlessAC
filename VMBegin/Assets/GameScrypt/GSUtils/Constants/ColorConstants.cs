@@ -1,48 +1,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameScrypt.GSUtils.Constants
-{
-    public static class ColorConstants
-    {
+namespace GameScrypt.GSUtils.Constants {
+    public static class ColorConstants {
         private static Dictionary<string, string> _hexes;
 
-        public static Color GetColor(COLOR colorEnum)
-        {
-            if (_hexes == null)
-            {
+        public static Color GetColor(COLOR colorEnum) {
+            if (_hexes == null) {
                 SetupHexes();
             }
             return GetColor(_hexes[colorEnum.ToString()]);
         }
 
-        public static Color GetColor(string hex)
-        {
+        public static Color GetColor(string hex) {
             Color newCol;
-            if (ColorUtility.TryParseHtmlString(hex, out newCol))
-            {
+            if (ColorUtility.TryParseHtmlString(hex, out newCol)) {
                 return newCol;
             }
             return new Color();
         }
 
-        public static Color GetColorByName(string colorName)
-        {
-            if (_hexes == null)
-            {
+        public static Color GetColorByName(string colorName) {
+            if (_hexes == null) {
                 SetupHexes();
             }
             return GetColor(_hexes[colorName]);
         }
 
-        public static Color ChangeAlphaColor(Color color, float a)
-        {
+        public static Color ChangeAlphaColor(Color color, float a) {
             color.a = a;
             return color;
         }
 
-        private static void SetupHexes()
-        {
+        private static void SetupHexes() {
             _hexes = new Dictionary<string, string>();
             AddHex("White", "ffffff");
             AddHex("Blue_Dark_Ebony_Clay", "232c40");
@@ -209,14 +199,12 @@ namespace GameScrypt.GSUtils.Constants
             AddHex("Blue_Wedgewood", "49929d");
         }
 
-        private static void AddHex(string key, string hex)
-        {
+        private static void AddHex(string key, string hex) {
             _hexes.Add(key, hex[0] == '#' ? hex : "#" + hex);
         }
     }
 
-    public enum COLOR
-    {
+    public enum COLOR {
         // Backgrounds
         Blue_Dark_Ebony_Clay,
 

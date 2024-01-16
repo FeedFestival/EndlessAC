@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservableDropTrigger : ObservableTriggerBase, IEventSystemHandler, IDropHandler
-    {
+    public class ObservableDropTrigger : ObservableTriggerBase, IEventSystemHandler, IDropHandler {
         Subject<PointerEventData> onDrop;
 
-        void IDropHandler.OnDrop(PointerEventData eventData)
-        {
+        void IDropHandler.OnDrop(PointerEventData eventData) {
             if (onDrop != null) onDrop.OnNext(eventData);
         }
 
-        public IObservable<PointerEventData> OnDropAsObservable()
-        {
+        public IObservable<PointerEventData> OnDropAsObservable() {
             return onDrop ?? (onDrop = new Subject<PointerEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onDrop != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onDrop != null) {
                 onDrop.OnCompleted();
             }
         }

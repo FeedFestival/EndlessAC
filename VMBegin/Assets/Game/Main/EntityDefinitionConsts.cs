@@ -9,23 +9,23 @@ namespace Game.Main {
             ENTITIES = new Dictionary<string, Dictionary<string, int>>() {
                 {
                     "Interactable",
-                    new Dictionary<string, int>() { 
-						{ "Door", 1 },
-						{ "Ladder", 2 },
+                    new Dictionary<string, int>() {
+                        { "Door", 1 },
+                        { "Ladder", 2 },
 
                     }
                 },
                 {
                     "Actor",
-                    new Dictionary<string, int>() { 
-						{ "SpaceShip", 1 },
-						{ "Alien", 7 },
+                    new Dictionary<string, int>() {
+                        { "SpaceShip", 1 },
+                        { "Alien", 7 },
 
                     }
                 },
             };
             VARIATIONS = new Dictionary<string, int>() {
-				{ "None", 0 },
+                { "None", 0 },
 
             };
 

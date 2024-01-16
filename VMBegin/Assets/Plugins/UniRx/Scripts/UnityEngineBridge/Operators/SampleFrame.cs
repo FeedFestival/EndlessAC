@@ -6,28 +6,23 @@ using UnityObservable = UniRx.ObservableUnity;
 using UnityObservable = UniRx.Observable;
 #endif
 
-namespace UniRx.Operators
-{
-    internal class SampleFrameObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class SampleFrameObservable<T> : OperatorObservableBase<T> {
         readonly IObservable<T> source;
         readonly int frameCount;
         readonly FrameCountType frameCountType;
 
-        public SampleFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread())
-        {
+        public SampleFrameObservable(IObservable<T> source, int frameCount, FrameCountType frameCountType) : base(source.IsRequiredSubscribeOnCurrentThread()) {
             this.source = source;
             this.frameCount = frameCount;
             this.frameCountType = frameCountType;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             return new SampleFrame(this, observer, cancel).Run();
         }
 
-        class SampleFrame : OperatorObserverBase<T, T>
-        {
+        class SampleFrame : OperatorObserverBase<T, T> {
             readonly SampleFrameObservable<T> parent;
             readonly object gate = new object();
             T latestValue = default(T);
@@ -35,13 +30,11 @@ namespace UniRx.Operators
             bool isCompleted = false;
             SingleAssignmentDisposable sourceSubscription;
 
-            public SampleFrame(SampleFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public SampleFrame(SampleFrameObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 sourceSubscription = new SingleAssignmentDisposable();
                 sourceSubscription.Disposable = parent.source.Subscribe(this);
 
@@ -51,77 +44,59 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(sourceSubscription, scheduling);
             }
 
-            void OnNextTick(long _)
-            {
-                lock (gate)
-                {
-                    if (isUpdated)
-                    {
+            void OnNextTick(long _) {
+                lock (gate) {
+                    if (isUpdated) {
                         var value = latestValue;
                         isUpdated = false;
                         observer.OnNext(value);
                     }
-                    if (isCompleted)
-                    {
+                    if (isCompleted) {
                         try { observer.OnCompleted(); } finally { Dispose(); }
                     }
                 }
             }
 
-            public override void OnNext(T value)
-            {
-                lock (gate)
-                {
+            public override void OnNext(T value) {
+                lock (gate) {
                     latestValue = value;
                     isUpdated = true;
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                lock (gate)
-                {
+            public override void OnError(Exception error) {
+                lock (gate) {
                     try { base.observer.OnError(error); } finally { Dispose(); }
                 }
             }
 
-            public override void OnCompleted()
-            {
-                lock (gate)
-                {
+            public override void OnCompleted() {
+                lock (gate) {
                     isCompleted = true;
                     sourceSubscription.Dispose();
                 }
             }
-            class SampleFrameTick : IObserver<long>
-            {
+            class SampleFrameTick : IObserver<long> {
                 readonly SampleFrame parent;
 
-                public SampleFrameTick(SampleFrame parent)
-                {
+                public SampleFrameTick(SampleFrame parent) {
                     this.parent = parent;
                 }
 
-                public void OnCompleted()
-                {
+                public void OnCompleted() {
                 }
 
-                public void OnError(Exception error)
-                {
+                public void OnError(Exception error) {
                 }
 
-                public void OnNext(long _)
-                {
-                    lock (parent.gate)
-                    {
-                        if (parent.isUpdated)
-                        {
+                public void OnNext(long _) {
+                    lock (parent.gate) {
+                        if (parent.isUpdated) {
                             var value = parent.latestValue;
                             parent.isUpdated = false;
                             parent.observer.OnNext(value);
                         }
-                        if (parent.isCompleted)
-                        {
+                        if (parent.isCompleted) {
                             try { parent.observer.OnCompleted(); } finally { parent.Dispose(); }
                         }
                     }

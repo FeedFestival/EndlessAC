@@ -1,33 +1,27 @@
 ﻿using System;
 using UnityEngine;
 
-namespace UniRx.Diagnostics
-{
-    public partial class Logger
-    {
+namespace UniRx.Diagnostics {
+    public partial class Logger {
         static bool isInitialized = false;
         static bool isDebugBuild = false;
 
         public string Name { get; private set; }
         protected readonly Action<LogEntry> logPublisher;
 
-        public Logger(string loggerName)
-        {
+        public Logger(string loggerName) {
             this.Name = loggerName;
             this.logPublisher = ObservableLogger.RegisterLogger(this);
         }
 
         /// <summary>Output LogType.Log but only enables isDebugBuild</summary>
-        public virtual void Debug(object message, UnityEngine.Object context = null)
-        {
-            if (!isInitialized)
-            {
+        public virtual void Debug(object message, UnityEngine.Object context = null) {
+            if (!isInitialized) {
                 isInitialized = true;
                 isDebugBuild = UnityEngine.Debug.isDebugBuild;
             }
 
-            if (isDebugBuild)
-            {
+            if (isDebugBuild) {
                 logPublisher(new LogEntry(
                     message: (message != null) ? message.ToString() : "",
                     logType: LogType.Log,
@@ -38,16 +32,13 @@ namespace UniRx.Diagnostics
         }
 
         /// <summary>Output LogType.Log but only enables isDebugBuild</summary>
-        public virtual void DebugFormat(string format, params object[] args)
-        {
-            if (!isInitialized)
-            {
+        public virtual void DebugFormat(string format, params object[] args) {
+            if (!isInitialized) {
                 isInitialized = true;
                 isDebugBuild = UnityEngine.Debug.isDebugBuild;
             }
 
-            if (isDebugBuild)
-            {
+            if (isDebugBuild) {
                 logPublisher(new LogEntry(
                     message: (format != null) ? string.Format(format, args) : "",
                     logType: LogType.Log,
@@ -57,8 +48,7 @@ namespace UniRx.Diagnostics
             }
         }
 
-        public virtual void Log(object message, UnityEngine.Object context = null)
-        {
+        public virtual void Log(object message, UnityEngine.Object context = null) {
             logPublisher(new LogEntry(
                 message: (message != null) ? message.ToString() : "",
                 logType: LogType.Log,
@@ -67,8 +57,7 @@ namespace UniRx.Diagnostics
                 context: context));
         }
 
-        public virtual void LogFormat(string format, params object[] args)
-        {
+        public virtual void LogFormat(string format, params object[] args) {
             logPublisher(new LogEntry(
                 message: (format != null) ? string.Format(format, args) : "",
                 logType: LogType.Log,
@@ -77,8 +66,7 @@ namespace UniRx.Diagnostics
                 context: null));
         }
 
-        public virtual void Warning(object message, UnityEngine.Object context = null)
-        {
+        public virtual void Warning(object message, UnityEngine.Object context = null) {
             logPublisher(new LogEntry(
                 message: (message != null) ? message.ToString() : "",
                 logType: LogType.Warning,
@@ -87,8 +75,7 @@ namespace UniRx.Diagnostics
                 context: context));
         }
 
-        public virtual void WarningFormat(string format, params object[] args)
-        {
+        public virtual void WarningFormat(string format, params object[] args) {
             logPublisher(new LogEntry(
                 message: (format != null) ? string.Format(format, args) : "",
                 logType: LogType.Warning,
@@ -97,8 +84,7 @@ namespace UniRx.Diagnostics
                 context: null));
         }
 
-        public virtual void Error(object message, UnityEngine.Object context = null)
-        {
+        public virtual void Error(object message, UnityEngine.Object context = null) {
             logPublisher(new LogEntry(
                 message: (message != null) ? message.ToString() : "",
                 logType: LogType.Error,
@@ -107,8 +93,7 @@ namespace UniRx.Diagnostics
                 context: context));
         }
 
-        public virtual void ErrorFormat(string format, params object[] args)
-        {
+        public virtual void ErrorFormat(string format, params object[] args) {
             logPublisher(new LogEntry(
                 message: (format != null) ? string.Format(format, args) : "",
                 logType: LogType.Error,
@@ -117,8 +102,7 @@ namespace UniRx.Diagnostics
                 context: null));
         }
 
-        public virtual void Exception(Exception exception, UnityEngine.Object context = null)
-        {
+        public virtual void Exception(Exception exception, UnityEngine.Object context = null) {
             logPublisher(new LogEntry(
                 message: (exception != null) ? exception.ToString() : "",
                 exception: exception,
@@ -129,8 +113,7 @@ namespace UniRx.Diagnostics
         }
 
         /// <summary>Publish raw LogEntry.</summary>
-        public virtual void Raw(LogEntry logEntry)
-        {
+        public virtual void Raw(LogEntry logEntry) {
             logPublisher(logEntry);
         }
     }

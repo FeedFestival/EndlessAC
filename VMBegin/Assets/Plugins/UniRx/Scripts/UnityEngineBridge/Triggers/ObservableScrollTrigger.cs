@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservableScrollTrigger : ObservableTriggerBase, IEventSystemHandler, IScrollHandler
-    {
+    public class ObservableScrollTrigger : ObservableTriggerBase, IEventSystemHandler, IScrollHandler {
         Subject<PointerEventData> onScroll;
 
-        void IScrollHandler.OnScroll(PointerEventData eventData)
-        {
+        void IScrollHandler.OnScroll(PointerEventData eventData) {
             if (onScroll != null) onScroll.OnNext(eventData);
         }
 
-        public IObservable<PointerEventData> OnScrollAsObservable()
-        {
+        public IObservable<PointerEventData> OnScrollAsObservable() {
             return onScroll ?? (onScroll = new Subject<PointerEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onScroll != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onScroll != null) {
                 onScroll.OnCompleted();
             }
         }

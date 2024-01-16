@@ -3,35 +3,26 @@
 using UnityEditor;
 using UnityEditor.Callbacks;
 
-namespace UniRx
-{
+namespace UniRx {
     [InitializeOnLoad]
-    public class ScenePlaybackDetector
-    {
+    public class ScenePlaybackDetector {
         private static bool _isPlaying = false;
 
-        private static bool AboutToStartScene
-        {
-            get
-            {
+        private static bool AboutToStartScene {
+            get {
                 return EditorPrefs.GetBool("AboutToStartScene");
             }
-            set
-            {
+            set {
                 EditorPrefs.SetBool("AboutToStartScene", value);
             }
         }
 
-        public static bool IsPlaying
-        {
-            get
-            {
+        public static bool IsPlaying {
+            get {
                 return _isPlaying;
             }
-            set
-            {
-                if (_isPlaying != value)
-                {
+            set {
+                if (_isPlaying != value) {
                     _isPlaying = value;
                 }
             }
@@ -39,18 +30,15 @@ namespace UniRx
 
         // This callback is notified after scripts have been reloaded.
         [DidReloadScripts]
-        public static void OnDidReloadScripts()
-        {
+        public static void OnDidReloadScripts() {
             // Filter DidReloadScripts callbacks to the moment where playmodeState transitions into isPlaying.
-            if (AboutToStartScene)
-            {
+            if (AboutToStartScene) {
                 IsPlaying = true;
             }
         }
 
         // InitializeOnLoad ensures that this constructor is called when the Unity Editor is started.
-        static ScenePlaybackDetector()
-        {
+        static ScenePlaybackDetector() {
 #if UNITY_2017_2_OR_NEWER
             EditorApplication.playModeStateChanged += e =>
 #else
@@ -61,18 +49,14 @@ namespace UniRx
                 // Pressed Playback button:     isPlayingOrWillChangePlaymode = true;   isPlaying = false
                 // Playing:                     isPlayingOrWillChangePlaymode = false;  isPlaying = true
                 // Pressed stop button:         isPlayingOrWillChangePlaymode = true;   isPlaying = true
-                if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
-                {
+                if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying) {
                     AboutToStartScene = true;
-                }
-                else
-                {
+                } else {
                     AboutToStartScene = false;
                 }
 
                 // Detect when playback is stopped.
-                if (!EditorApplication.isPlaying)
-                {
+                if (!EditorApplication.isPlaying) {
                     IsPlaying = false;
                 }
             };

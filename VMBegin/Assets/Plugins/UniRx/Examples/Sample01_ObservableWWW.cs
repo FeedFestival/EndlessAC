@@ -6,13 +6,10 @@
 
 using UnityEngine;
 
-namespace UniRx.Examples
-{
+namespace UniRx.Examples {
     // sample script, attach your object.
-    public class Sample01_ObservableWWW : MonoBehaviour
-    {
-        void Start()
-        {
+    public class Sample01_ObservableWWW : MonoBehaviour {
+        void Start() {
             // Basic: Download from google.
             {
                 ObservableWWW.Get("http://google.co.jp/")
@@ -42,8 +39,7 @@ namespace UniRx.Examples
                     ObservableWWW.Get("http://bing.com/"),
                     ObservableWWW.Get("http://unity3d.com/"));
 
-                parallel.Subscribe(xs =>
-                {
+                parallel.Subscribe(xs => {
                     Debug.Log(xs[0].Substring(0, 100)); // google
                     Debug.Log(xs[1].Substring(0, 100)); // bing
                     Debug.Log(xs[2].Substring(0, 100)); // unity
@@ -65,15 +61,12 @@ namespace UniRx.Examples
                 // If WWW has .error, ObservableWWW throws WWWErrorException to onError pipeline.
                 // WWWErrorException has RawErrorMessage, HasResponse, StatusCode, ResponseHeaders
                 ObservableWWW.Get("http://www.google.com/404")
-                    .CatchIgnore((WWWErrorException ex) =>
-                    {
+                    .CatchIgnore((WWWErrorException ex) => {
                         Debug.Log(ex.RawErrorMessage);
-                        if (ex.HasResponse)
-                        {
+                        if (ex.HasResponse) {
                             Debug.Log(ex.StatusCode);
                         }
-                        foreach (var item in ex.ResponseHeaders)
-                        {
+                        foreach (var item in ex.ResponseHeaders) {
                             Debug.Log(item.Key + ":" + item.Value);
                         }
                     })

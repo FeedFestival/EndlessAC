@@ -14,10 +14,8 @@ namespace UniRx
 
 #endif
 
-namespace UniRx
-{
-    public interface IGroupedObservable<TKey, TElement> : IObservable<TElement>
-    {
+namespace UniRx {
+    public interface IGroupedObservable<TKey, TElement> : IObservable<TElement> {
         TKey Key { get; }
     }
 }

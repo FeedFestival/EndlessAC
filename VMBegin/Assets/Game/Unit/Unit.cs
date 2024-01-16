@@ -1,5 +1,6 @@
 using Game.Shared.Interfaces;
 using UnityEngine;
+using _ = Game.Main;
 
 namespace Game.Unit {
     public class Unit : UnitBase, IUnit {
@@ -14,13 +15,14 @@ namespace Game.Unit {
 
         private Motor _motorRef;
 
-
         public IActor Actor { get; private set; }
 
-        public void Init(ITrigger movementTargetTrigger = null) {
+        public void Init(IWorldIndicatorManager worldIndicatorManager = null) {
 
             var entityId = gameObject.GetComponent<IEntityId>();
             ID = entityId.CalculateId();
+
+            var movementTargetTrigger = createMovementTarget(worldIndicatorManager);
 
             Actor = _actorRef.GetComponent<IActor>();
             //Actor.Ini
@@ -51,6 +53,16 @@ namespace Game.Unit {
 
         void onMovementTargetHit() {
             _motorRef.MoveTargetReached();
+        }
+
+        ITrigger createMovementTarget(IWorldIndicatorManager worldIndicatorManager = null) {
+            var go = Instantiate(_.Main._.BasePrefabs.MovementTargetSignal);
+
+            if (worldIndicatorManager != null) {
+                go.transform.SetParent(worldIndicatorManager.transform);
+            }
+
+            return go.GetComponent<ITrigger>();
         }
     }
 }

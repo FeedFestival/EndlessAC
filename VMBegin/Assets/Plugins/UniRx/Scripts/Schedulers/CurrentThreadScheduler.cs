@@ -8,11 +8,9 @@ using System.Diagnostics;
 using System.Threading;
 using UniRx.InternalUtil;
 
-namespace UniRx
-{
+namespace UniRx {
 
-    public static partial class Scheduler
-    {
+    public static partial class Scheduler {
         public static readonly IScheduler CurrentThread = new CurrentThreadScheduler();
 
         public static bool IsCurrentThreadSchedulerScheduleRequired { get { return CurrentThreadScheduler.IsScheduleRequired; } }
@@ -21,28 +19,23 @@ namespace UniRx
         /// Represents an object that schedules units of work on the current thread.
         /// </summary>
         /// <seealso cref="Scheduler.CurrentThread">Singleton instance of this type exposed through this static property.</seealso>
-        class CurrentThreadScheduler : IScheduler
-        {
+        class CurrentThreadScheduler : IScheduler {
             [ThreadStatic]
             static SchedulerQueue s_threadLocalQueue;
 
             [ThreadStatic]
             static Stopwatch s_clock;
 
-            private static SchedulerQueue GetQueue()
-            {
+            private static SchedulerQueue GetQueue() {
                 return s_threadLocalQueue;
             }
 
-            private static void SetQueue(SchedulerQueue newQueue)
-            {
+            private static void SetQueue(SchedulerQueue newQueue) {
                 s_threadLocalQueue = newQueue;
             }
 
-            private static TimeSpan Time
-            {
-                get
-                {
+            private static TimeSpan Time {
+                get {
                     if (s_clock == null)
                         s_clock = Stopwatch.StartNew();
 
@@ -54,21 +47,17 @@ namespace UniRx
             /// Gets a value that indicates whether the caller must call a Schedule method.
             /// </summary>
             [EditorBrowsable(EditorBrowsableState.Advanced)]
-            public static bool IsScheduleRequired
-            {
-                get
-                {
+            public static bool IsScheduleRequired {
+                get {
                     return GetQueue() == null;
                 }
             }
 
-            public IDisposable Schedule(Action action)
-            {
+            public IDisposable Schedule(Action action) {
                 return Schedule(TimeSpan.Zero, action);
             }
 
-            public IDisposable Schedule(TimeSpan dueTime, Action action)
-            {
+            public IDisposable Schedule(TimeSpan dueTime, Action action) {
                 if (action == null)
                     throw new ArgumentNullException("action");
 
@@ -78,41 +67,30 @@ namespace UniRx
 
                 var queue = GetQueue();
 
-                if (queue == null)
-                {
+                if (queue == null) {
                     queue = new SchedulerQueue(4);
                     queue.Enqueue(si);
 
                     CurrentThreadScheduler.SetQueue(queue);
-                    try
-                    {
+                    try {
                         Trampoline.Run(queue);
-                    }
-                    finally
-                    {
+                    } finally {
                         CurrentThreadScheduler.SetQueue(null);
                     }
-                }
-                else
-                {
+                } else {
                     queue.Enqueue(si);
                 }
 
                 return si.Cancellation;
             }
 
-            static class Trampoline
-            {
-                public static void Run(SchedulerQueue queue)
-                {
-                    while (queue.Count > 0)
-                    {
+            static class Trampoline {
+                public static void Run(SchedulerQueue queue) {
+                    while (queue.Count > 0) {
                         var item = queue.Dequeue();
-                        if (!item.IsCanceled)
-                        {
+                        if (!item.IsCanceled) {
                             var wait = item.DueTime - CurrentThreadScheduler.Time;
-                            if (wait.Ticks > 0)
-                            {
+                            if (wait.Ticks > 0) {
                                 Thread.Sleep(wait);
                             }
 
@@ -123,8 +101,7 @@ namespace UniRx
                 }
             }
 
-            public DateTimeOffset Now
-            {
+            public DateTimeOffset Now {
                 get { return Scheduler.Now; }
             }
         }

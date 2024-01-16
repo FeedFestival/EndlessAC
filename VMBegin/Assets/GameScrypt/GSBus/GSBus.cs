@@ -3,18 +3,15 @@ using System.Collections.Generic;
 using UniRx;
 using UnityEngine;
 
-namespace GameScrypt.Bus
-{
-    public class GSBus : IBus
-    {
+namespace GameScrypt.Bus {
+    public class GSBus : IBus {
         private object s_stationLock;
         private object s_intervalLock;
         private Dictionary<int, List<IEvtPackage>> e_station;
         private Dictionary<string, List<IEvtPackage>> s_station;
         private List<IDisposable> s_intervals;
 
-        public GSBus()
-        {
+        public GSBus() {
             s_stationLock = new object();
             s_intervalLock = new object();
             e_station = new Dictionary<int, List<IEvtPackage>>();
@@ -22,80 +19,63 @@ namespace GameScrypt.Bus
             s_intervals = new List<IDisposable>();
         }
 
-        public virtual IEvtPackage On(object evt, Action handler)
-        {
+        public virtual IEvtPackage On(object evt, Action handler) {
             int eventId = GSBus.GetEventId(evt);
             return OnEmpty(eventId, handler, Scheduler.MainThread);
         }
 
-        public virtual IEvtPackage On(object evt, Action<object> handler)
-        {
+        public virtual IEvtPackage On(object evt, Action<object> handler) {
             int eventId = GSBus.GetEventId(evt);
             return On(eventId, handler, Scheduler.MainThread);
         }
 
-        public virtual IEvtPackage On(int eventId, Action<object> handler, IScheduler runOn)
-        {
+        public virtual IEvtPackage On(int eventId, Action<object> handler, IScheduler runOn) {
             // create new slot for this bus
-            var newEvtPackage = new EvtPackage
-            {
+            var newEvtPackage = new EvtPackage {
                 eventId = eventId
             };
             newEvtPackage.disposable = newEvtPackage.observable
                 .ObserveOn(runOn)
                 .Subscribe(obj => handler(obj));
 
-            lock (e_station)
-            {
+            lock (e_station) {
                 // check if we already add this bus
-                if (e_station.ContainsKey(eventId))
-                {
+                if (e_station.ContainsKey(eventId)) {
                     e_station[eventId].Add(newEvtPackage as IEvtPackage);
-                }
-                else
-                {
+                } else {
                     e_station[eventId] = new List<IEvtPackage>() { newEvtPackage as IEvtPackage };
                 }
             }
             return newEvtPackage as IEvtPackage;
         }
 
-        private IEvtPackage OnEmpty(int eventId, Action emptyHandler, IScheduler runOn)
-        {
+        private IEvtPackage OnEmpty(int eventId, Action emptyHandler, IScheduler runOn) {
             // create new slot for this bus
-            var newEvtPackage = new EvtPackage
-            {
+            var newEvtPackage = new EvtPackage {
                 eventId = eventId
             };
             newEvtPackage.disposable = newEvtPackage.observable
                 .ObserveOn(runOn)
                 .Subscribe(obj => emptyHandler());
 
-            lock (e_station)
-            {
+            lock (e_station) {
                 // check if we already add this bus
-                if (e_station.ContainsKey(eventId))
-                {
+                if (e_station.ContainsKey(eventId)) {
                     e_station[eventId].Add(newEvtPackage as IEvtPackage);
-                }
-                else
-                {
+                } else {
                     e_station[eventId] = new List<IEvtPackage>() { newEvtPackage as IEvtPackage };
                 }
             }
             return newEvtPackage as IEvtPackage;
         }
 
-        public void Register(object evtPackage, string evt, Action<object, object> handler)
-        {
+        public void Register(object evtPackage, string evt, Action<object, object> handler) {
             Register(evtPackage, evt, handler, Scheduler.MainThread);
         }
 
-        public void Register(object evtPackage, string evt, Action<object, object> handler, IScheduler runOn)
-        {
+        public void Register(object evtPackage, string evt, Action<object, object> handler, IScheduler runOn) {
             // create new slot for this bus
-            var newEvtPackage = new EvtPackage
-            {
+            var newEvtPackage = new EvtPackage {
                 id = evtPackage.GetType().FullName,
                 busId = evt
             };
@@ -103,128 +83,95 @@ namespace GameScrypt.Bus
                 .ObserveOn(runOn)
                 .Subscribe(obj => handler(evtPackage, obj));
 
-            lock (s_stationLock)
-            {
+            lock (s_stationLock) {
                 // check if we already add this bus
-                if (s_station.ContainsKey(evt))
-                {
+                if (s_station.ContainsKey(evt)) {
                     var evtPackages = s_station[evt];
                     var shouldAdd = true;
-                    foreach (var op in evtPackages)
-                    {
+                    foreach (var op in evtPackages) {
                         // there is no glich on matrix that 2 version of evtPackage on bus
                         // at same time
-                        if (op.id == newEvtPackage.id)
-                        {
+                        if (op.id == newEvtPackage.id) {
                             shouldAdd = false;
                             break;
                         }
                     }
-                    if (shouldAdd)
-                    {
+                    if (shouldAdd) {
                         evtPackages.Add(newEvtPackage as IEvtPackage);
                     }
-                }
-                else
-                {
+                } else {
                     s_station[evt] = new List<IEvtPackage>() { newEvtPackage as IEvtPackage };
                 }
             }
         }
 
-        public void UnregisterByEvent(object evt)
-        {
+        public void UnregisterByEvent(object evt) {
             int eventId = GSBus.GetEventId(evt);
-            lock (s_stationLock)
-            {
-                if (e_station.ContainsKey(eventId))
-                {
+            lock (s_stationLock) {
+                if (e_station.ContainsKey(eventId)) {
                     List<IEvtPackage> evtPackages = e_station[eventId];
                     evtPackages.ForEach(p => p.disposable?.Dispose());
                     evtPackages.Clear();
                     e_station.Remove(eventId);
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to unregister event id [" + evt + "] but not found");
                 }
             }
         }
 
-        public void UnregisterByEvent(object evt, Action handler)
-        {
+        public void UnregisterByEvent(object evt, Action handler) {
             int eventId = GSBus.GetEventId(evt);
-            lock (s_stationLock)
-            {
-                if (e_station.ContainsKey(eventId))
-                {
+            lock (s_stationLock) {
+                if (e_station.ContainsKey(eventId)) {
                     List<IEvtPackage> evtPackages = e_station[eventId];
                     evtPackages.ForEach(p => p.disposable?.Dispose());
                     evtPackages.Clear();
                     e_station.Remove(eventId);
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to unregister event id [" + evt + "] but not found");
                 }
             }
         }
 
-        public void UnregisterByEvent(object evt, Action<object> handler)
-        {
+        public void UnregisterByEvent(object evt, Action<object> handler) {
             int eventId = GSBus.GetEventId(evt);
-            lock (s_stationLock)
-            {
-                if (e_station.ContainsKey(eventId))
-                {
+            lock (s_stationLock) {
+                if (e_station.ContainsKey(eventId)) {
                     List<IEvtPackage> evtPackages = e_station[eventId];
                     evtPackages.ForEach(p => p.disposable?.Dispose());
                     evtPackages.Clear();
                     e_station.Remove(eventId);
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to unregister event id [" + evt + "] but not found");
                 }
             }
         }
 
-        public void Unregister(string evt)
-        {
-            lock (s_stationLock)
-            {
-                if (s_station.ContainsKey(evt))
-                {
+        public void Unregister(string evt) {
+            lock (s_stationLock) {
+                if (s_station.ContainsKey(evt)) {
                     var evtPackages = s_station[evt];
                     evtPackages.ForEach(p => p.disposable?.Dispose());
                     evtPackages.Clear();
                     s_station.Remove(evt);
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to unregister event id [" + evt + "] but not found");
                 }
             }
         }
 
-        public void Unregister(object evtPackage)
-        {
-            lock (s_stationLock)
-            {
-                foreach (var evt in s_station.Keys)
-                {
+        public void Unregister(object evtPackage) {
+            lock (s_stationLock) {
+                foreach (var evt in s_station.Keys) {
                     var evtPackages = s_station[evt];
-                    foreach (var p in evtPackages)
-                    {
-                        if (p.id == evtPackage.GetType().FullName)
-                        {
+                    foreach (var p in evtPackages) {
+                        if (p.id == evtPackage.GetType().FullName) {
                             p.disposable?.Dispose();
                             evtPackages.Remove(p);
                             break;
                         }
                     }
-                    if (evtPackages.Count == 0)
-                    {
+                    if (evtPackages.Count == 0) {
                         s_station.Remove(evt);
                         break;
                     }
@@ -232,15 +179,11 @@ namespace GameScrypt.Bus
             }
         }
 
-        public void UnregisterAll()
-        {
-            lock (s_stationLock)
-            {
-                foreach (var evt in s_station.Keys)
-                {
+        public void UnregisterAll() {
+            lock (s_stationLock) {
+                foreach (var evt in s_station.Keys) {
                     var evtPackages = s_station[evt];
-                    foreach (var p in evtPackages)
-                    {
+                    foreach (var p in evtPackages) {
                         p.disposable?.Dispose();
                     }
                     evtPackages.Clear();
@@ -249,111 +192,82 @@ namespace GameScrypt.Bus
             }
         }
 
-        public bool Emit(object evt, object data = null)
-        {
+        public bool Emit(object evt, object data = null) {
             int eventId = GSBus.GetEventId(evt);
-            lock (e_station)
-            {
-                if (e_station.ContainsKey(eventId))
-                {
+            lock (e_station) {
+                if (e_station.ContainsKey(eventId)) {
                     var evtPackages = e_station[eventId];
                     evtPackages.ForEach(p => p.subject.OnNext(data));
                     return true;
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to call event id [" + evt + "] but it's not register in anywhere.");
                 }
             }
             return false;
         }
 
-        public bool Call(string evt, object data = null)
-        {
-            lock (e_station)
-            {
-                if (s_station.ContainsKey(evt))
-                {
+        public bool Call(string evt, object data = null) {
+            lock (e_station) {
+                if (s_station.ContainsKey(evt)) {
                     var evtPackages = s_station[evt];
                     evtPackages.ForEach(p => p.subject.OnNext(data));
                     return true;
-                }
-                else
-                {
+                } else {
                     Debug.LogWarning("[Event Bus] try to call event id [" + evt + "] but it's not register in anywhere.");
                 }
             }
             return false;
         }
 
-        public void Call(string evt, long delay, object data = null)
-        {
-            Call(delay, () =>
-            {
+        public void Call(string evt, long delay, object data = null) {
+            Call(delay, () => {
                 Call(evt, data);
             });
         }
 
-        public void Call(long delay, Action callback)
-        {
+        public void Call(long delay, Action callback) {
             // create timer dispose after finish call
-            var timer = Observable.Create<long>(o =>
-            {
+            var timer = Observable.Create<long>(o => {
                 var d = Observable.Timer(new TimeSpan(delay * TimeSpan.TicksPerMillisecond)).Subscribe(o);
-                return Disposable.Create(() =>
-                {
+                return Disposable.Create(() => {
                     d.Dispose();
                 });
             });
             timer.Subscribe(ticks => callback.Invoke());
         }
 
-        public IDisposable Interval(long ticks, Action callback)
-        {
+        public IDisposable Interval(long ticks, Action callback) {
             var d = Observable.Interval(new TimeSpan(ticks * TimeSpan.TicksPerMillisecond)).Subscribe(v => callback.Invoke());
-            lock (s_intervalLock)
-            {
+            lock (s_intervalLock) {
                 s_intervals.Add(d);
             }
             return d;
         }
 
-        public void ClearInterval(IDisposable d)
-        {
-            lock (s_intervalLock)
-            {
+        public void ClearInterval(IDisposable d) {
+            lock (s_intervalLock) {
                 s_intervals.Remove(d);
             }
             d.Dispose();
         }
 
-        public void ClearAllInterval()
-        {
-            lock (s_intervalLock)
-            {
-                foreach (var d in s_intervals)
-                {
+        public void ClearAllInterval() {
+            lock (s_intervalLock) {
+                foreach (var d in s_intervals) {
                     d.Dispose();
                 }
                 s_intervals.Clear();
             }
         }
 
-        public static int GetEventId(object evt)
-        {
-            if (evt != null)
-            {
-                if (evt.GetType().IsEnum)
-                {
+        public static int GetEventId(object evt) {
+            if (evt != null) {
+                if (evt.GetType().IsEnum) {
                     return (int)evt;
-                }
-                else
-                {
+                } else {
                     throw new ArgumentException("Invalid event ID type");
                 }
-            }
-            else
-            {
+            } else {
                 throw new ArgumentNullException(nameof(evt));
             }
         }

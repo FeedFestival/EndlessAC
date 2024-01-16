@@ -1,10 +1,8 @@
 using System;
 using UniRx;
 
-namespace GameScrypt.Bus
-{
-    public class EvtPackage : IEvtPackage
-    {
+namespace GameScrypt.Bus {
+    public class EvtPackage : IEvtPackage {
         public Subject<object> subject { get; set; }
         public Subject<bool> subjectBool { get; set; }
         public IDisposable disposable { get; set; }
@@ -14,8 +12,7 @@ namespace GameScrypt.Bus
         public int eventId { get; set; }
         public string id { get; set; }
 
-        public EvtPackage()
-        {
+        public EvtPackage() {
             subject = new Subject<object>();
             subjectBool = new Subject<bool>();
             disposable = null;

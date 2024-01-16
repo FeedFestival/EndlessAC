@@ -3,12 +3,9 @@
 using UniRx.Triggers; // for enable gameObject.EventAsObservbale()
 using UnityEngine;
 
-namespace UniRx.Examples
-{
-    public class Sample03_GameObjectAsObservable : MonoBehaviour
-    {
-        void Start()
-        {
+namespace UniRx.Examples {
+    public class Sample03_GameObjectAsObservable : MonoBehaviour {
+        void Start() {
             // All events can subscribe by ***AsObservable if enables UniRx.Triggers
             this.OnMouseDownAsObservable()
                 .SelectMany(_ => this.gameObject.UpdateAsObservable())

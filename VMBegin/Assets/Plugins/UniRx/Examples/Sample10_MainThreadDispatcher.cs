@@ -2,12 +2,9 @@
 using System.Collections;
 using UnityEngine;
 
-namespace UniRx.Examples
-{
-    public class Sample10_MainThreadDispatcher
-    {
-        public void Run()
-        {
+namespace UniRx.Examples {
+    public class Sample10_MainThreadDispatcher {
+        public void Run() {
             // MainThreadDispatcher is heart of Rx and Unity integration
 
             // StartCoroutine can start coroutine besides MonoBehaviour.
@@ -34,8 +31,7 @@ namespace UniRx.Examples
                 .Subscribe(x => Debug.Log(x));
         }
 
-        IEnumerator TestAsync()
-        {
+        IEnumerator TestAsync() {
             Debug.Log("a");
             yield return new WaitForSeconds(1);
             Debug.Log("b");

@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UniRx.Operators
-{
+namespace UniRx.Operators {
     public delegate TR ZipLatestFunc<T1, T2, T3, TR>(T1 arg1, T2 arg2, T3 arg3);
     public delegate TR ZipLatestFunc<T1, T2, T3, T4, TR>(T1 arg1, T2 arg2, T3 arg3, T4 arg4);
     public delegate TR ZipLatestFunc<T1, T2, T3, T4, T5, TR>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
@@ -10,27 +9,23 @@ namespace UniRx.Operators
     public delegate TR ZipLatestFunc<T1, T2, T3, T4, T5, T6, T7, TR>(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7);
 
     // binary
-    internal class ZipLatestObservable<TLeft, TRight, TResult> : OperatorObservableBase<TResult>
-    {
+    internal class ZipLatestObservable<TLeft, TRight, TResult> : OperatorObservableBase<TResult> {
         readonly IObservable<TLeft> left;
         readonly IObservable<TRight> right;
         readonly Func<TLeft, TRight, TResult> selector;
 
         public ZipLatestObservable(IObservable<TLeft> left, IObservable<TRight> right, Func<TLeft, TRight, TResult> selector)
-            : base(left.IsRequiredSubscribeOnCurrentThread() || right.IsRequiredSubscribeOnCurrentThread())
-        {
+            : base(left.IsRequiredSubscribeOnCurrentThread() || right.IsRequiredSubscribeOnCurrentThread()) {
             this.left = left;
             this.right = right;
             this.selector = selector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TResult> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TResult> observer, IDisposable cancel) {
             return new ZipLatest(this, observer, cancel).Run();
         }
 
-        class ZipLatest : OperatorObserverBase<TResult, TResult>
-        {
+        class ZipLatest : OperatorObserverBase<TResult, TResult> {
             readonly ZipLatestObservable<TLeft, TRight, TResult> parent;
             readonly object gate = new object();
 
@@ -42,13 +37,11 @@ namespace UniRx.Operators
             bool rightStarted = false;
             bool rightCompleted = false;
 
-            public ZipLatest(ZipLatestObservable<TLeft, TRight, TResult> parent, IObserver<TResult> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public ZipLatest(ZipLatestObservable<TLeft, TRight, TResult> parent, IObserver<TResult> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 var l = parent.left.Subscribe(new LeftObserver(this));
                 var r = parent.right.Subscribe(new RightObserver(this));
 
@@ -56,28 +49,19 @@ namespace UniRx.Operators
             }
 
             // publish in lock
-            public void Publish()
-            {
-                if ((leftCompleted && !leftStarted) || (rightCompleted && !rightStarted))
-                {
-                    try { observer.OnCompleted(); }
-                    finally { Dispose(); }
+            public void Publish() {
+                if ((leftCompleted && !leftStarted) || (rightCompleted && !rightStarted)) {
+                    try { observer.OnCompleted(); } finally { Dispose(); }
                     return;
-                }
-                else if (!(leftStarted && rightStarted))
-                {
+                } else if (!(leftStarted && rightStarted)) {
                     return;
                 }
 
                 TResult v;
-                try
-                {
+                try {
                     v = parent.selector(leftValue, rightValue);
-                }
-                catch (Exception ex)
-                {
-                    try { observer.OnError(ex); }
-                    finally { Dispose(); }
+                } catch (Exception ex) {
+                    try { observer.OnError(ex); } finally { Dispose(); }
                     return;
                 }
 
@@ -85,100 +69,77 @@ namespace UniRx.Operators
                 leftStarted = false;
                 rightStarted = false;
 
-                if (leftCompleted || rightCompleted)
-                {
-                    try { observer.OnCompleted(); }
-                    finally { Dispose(); }
+                if (leftCompleted || rightCompleted) {
+                    try { observer.OnCompleted(); } finally { Dispose(); }
                     return;
                 }
             }
 
-            public override void OnNext(TResult value)
-            {
+            public override void OnNext(TResult value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
 
-            class LeftObserver : IObserver<TLeft>
-            {
+            class LeftObserver : IObserver<TLeft> {
                 readonly ZipLatest parent;
 
-                public LeftObserver(ZipLatest parent)
-                {
+                public LeftObserver(ZipLatest parent) {
                     this.parent = parent;
                 }
 
-                public void OnNext(TLeft value)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnNext(TLeft value) {
+                    lock (parent.gate) {
                         parent.leftStarted = true;
                         parent.leftValue = value;
                         parent.Publish();
                     }
                 }
 
-                public void OnError(Exception error)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnError(Exception error) {
+                    lock (parent.gate) {
                         parent.OnError(error);
                     }
                 }
 
-                public void OnCompleted()
-                {
-                    lock (parent.gate)
-                    {
+                public void OnCompleted() {
+                    lock (parent.gate) {
                         parent.leftCompleted = true;
                         if (parent.rightCompleted) parent.OnCompleted();
                     }
                 }
             }
 
-            class RightObserver : IObserver<TRight>
-            {
+            class RightObserver : IObserver<TRight> {
                 readonly ZipLatest parent;
 
-                public RightObserver(ZipLatest parent)
-                {
+                public RightObserver(ZipLatest parent) {
                     this.parent = parent;
                 }
 
 
-                public void OnNext(TRight value)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnNext(TRight value) {
+                    lock (parent.gate) {
                         parent.rightStarted = true;
                         parent.rightValue = value;
                         parent.Publish();
                     }
                 }
 
-                public void OnError(Exception error)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnError(Exception error) {
+                    lock (parent.gate) {
                         parent.OnError(error);
                     }
                 }
 
-                public void OnCompleted()
-                {
-                    lock (parent.gate)
-                    {
+                public void OnCompleted() {
+                    lock (parent.gate) {
                         parent.rightCompleted = true;
                         if (parent.leftCompleted) parent.OnCompleted();
                     }
@@ -188,23 +149,19 @@ namespace UniRx.Operators
     }
 
     // array
-    internal class ZipLatestObservable<T> : OperatorObservableBase<IList<T>>
-    {
+    internal class ZipLatestObservable<T> : OperatorObservableBase<IList<T>> {
         readonly IObservable<T>[] sources;
 
         public ZipLatestObservable(IObservable<T>[] sources)
-            : base(true)
-        {
+            : base(true) {
             this.sources = sources;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<IList<T>> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<IList<T>> observer, IDisposable cancel) {
             return new ZipLatest(this, observer, cancel).Run();
         }
 
-        class ZipLatest : OperatorObserverBase<IList<T>, IList<T>>
-        {
+        class ZipLatest : OperatorObserverBase<IList<T>, IList<T>> {
             readonly ZipLatestObservable<T> parent;
             readonly object gate = new object();
 
@@ -213,21 +170,18 @@ namespace UniRx.Operators
             bool[] isStarted;
             bool[] isCompleted;
 
-            public ZipLatest(ZipLatestObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public ZipLatest(ZipLatestObservable<T> parent, IObserver<IList<T>> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 length = parent.sources.Length;
                 values = new T[length];
                 isStarted = new bool[length];
                 isCompleted = new bool[length];
 
                 var disposables = new IDisposable[length];
-                for (int i = 0; i < length; i++)
-                {
+                for (int i = 0; i < length; i++) {
                     var source = parent.sources[i];
                     disposables[i] = source.Subscribe(new ZipLatestObserver(this, i));
                 }
@@ -236,16 +190,13 @@ namespace UniRx.Operators
             }
 
             // publish is in the lock
-            void Publish(int index)
-            {
+            void Publish(int index) {
                 isStarted[index] = true;
 
                 var hasOnCompleted = false;
                 var allValueStarted = true;
-                for (int i = 0; i < length; i++)
-                {
-                    if (!isStarted[i])
-                    {
+                for (int i = 0; i < length; i++) {
+                    if (!isStarted[i]) {
                         allValueStarted = false;
                         break;
                     }
@@ -253,99 +204,73 @@ namespace UniRx.Operators
                     if (isCompleted[i]) hasOnCompleted = true;
                 }
 
-                if (allValueStarted)
-                {
+                if (allValueStarted) {
                     OnNext(new List<T>(values));
-                    if (hasOnCompleted)
-                    {
-                        try { observer.OnCompleted(); }
-                        finally { Dispose(); }
+                    if (hasOnCompleted) {
+                        try { observer.OnCompleted(); } finally { Dispose(); }
                         return;
-                    }
-                    else
-                    {
+                    } else {
                         Array.Clear(isStarted, 0, length); // reset
                         return;
                     }
-                }
-                else
-                {
-                    for (int i = 0; i < length; i++)
-                    {
+                } else {
+                    for (int i = 0; i < length; i++) {
                         if (i == index) continue;
-                        if (isCompleted[i] && !isStarted[i])
-                        {
-                            try { observer.OnCompleted(); }
-                            finally { Dispose(); }
+                        if (isCompleted[i] && !isStarted[i]) {
+                            try { observer.OnCompleted(); } finally { Dispose(); }
                             return;
                         }
                     }
                 }
             }
 
-            public override void OnNext(IList<T> value)
-            {
+            public override void OnNext(IList<T> value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
 
-            class ZipLatestObserver : IObserver<T>
-            {
+            class ZipLatestObserver : IObserver<T> {
                 readonly ZipLatest parent;
                 readonly int index;
 
-                public ZipLatestObserver(ZipLatest parent, int index)
-                {
+                public ZipLatestObserver(ZipLatest parent, int index) {
                     this.parent = parent;
                     this.index = index;
                 }
 
-                public void OnNext(T value)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnNext(T value) {
+                    lock (parent.gate) {
                         parent.values[index] = value;
                         parent.Publish(index);
                     }
                 }
 
-                public void OnError(Exception ex)
-                {
-                    lock (parent.gate)
-                    {
+                public void OnError(Exception ex) {
+                    lock (parent.gate) {
                         parent.OnError(ex);
                     }
                 }
 
-                public void OnCompleted()
-                {
-                    lock (parent.gate)
-                    {
+                public void OnCompleted() {
+                    lock (parent.gate) {
                         parent.isCompleted[index] = true;
 
                         var allTrue = true;
-                        for (int i = 0; i < parent.length; i++)
-                        {
-                            if (!parent.isCompleted[i])
-                            {
+                        for (int i = 0; i < parent.length; i++) {
+                            if (!parent.isCompleted[i]) {
                                 allTrue = false;
                                 break;
                             }
                         }
 
-                        if (allTrue)
-                        {
+                        if (allTrue) {
                             parent.OnCompleted();
                         }
                     }
@@ -357,8 +282,7 @@ namespace UniRx.Operators
     // generated from UniRx.Console.ZipLatestGenerator.tt
     #region NTH
 
-    internal class ZipLatestObservable<T1, T2, T3, TR> : OperatorObservableBase<TR>
-    {
+    internal class ZipLatestObservable<T1, T2, T3, TR> : OperatorObservableBase<TR> {
         IObservable<T1> source1;
         IObservable<T2> source2;
         IObservable<T3> source3;
@@ -373,21 +297,18 @@ namespace UniRx.Operators
                 source1.IsRequiredSubscribeOnCurrentThread() ||
                 source2.IsRequiredSubscribeOnCurrentThread() ||
                 source3.IsRequiredSubscribeOnCurrentThread() ||
-                false)
-        {
+                false) {
             this.source1 = source1;
             this.source2 = source2;
             this.source3 = source3;
             this.resultSelector = resultSelector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel) {
             return new ZipLatest(3, this, observer, cancel).Run();
         }
 
-        class ZipLatest : NthZipLatestObserverBase<TR>
-        {
+        class ZipLatest : NthZipLatestObserverBase<TR> {
             readonly ZipLatestObservable<T1, T2, T3, TR> parent;
             readonly object gate = new object();
             ZipLatestObserver<T1> c1;
@@ -395,13 +316,11 @@ namespace UniRx.Operators
             ZipLatestObserver<T3> c3;
 
             public ZipLatest(int length, ZipLatestObservable<T1, T2, T3, TR> parent, IObserver<TR> observer, IDisposable cancel)
-                : base(length, observer, cancel)
-            {
+                : base(length, observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 c1 = new ZipLatestObserver<T1>(gate, this, 0);
                 c2 = new ZipLatestObserver<T2>(gate, this, 1);
                 c3 = new ZipLatestObserver<T3>(gate, this, 2);
@@ -413,33 +332,26 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(s1, s2, s3);
             }
 
-            public override TR GetResult()
-            {
+            public override TR GetResult() {
                 return parent.resultSelector(c1.Value, c2.Value, c3.Value);
             }
 
-            public override void OnNext(TR value)
-            {
+            public override void OnNext(TR value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
 
 
-    internal class ZipLatestObservable<T1, T2, T3, T4, TR> : OperatorObservableBase<TR>
-    {
+    internal class ZipLatestObservable<T1, T2, T3, T4, TR> : OperatorObservableBase<TR> {
         IObservable<T1> source1;
         IObservable<T2> source2;
         IObservable<T3> source3;
@@ -457,8 +369,7 @@ namespace UniRx.Operators
                 source2.IsRequiredSubscribeOnCurrentThread() ||
                 source3.IsRequiredSubscribeOnCurrentThread() ||
                 source4.IsRequiredSubscribeOnCurrentThread() ||
-                false)
-        {
+                false) {
             this.source1 = source1;
             this.source2 = source2;
             this.source3 = source3;
@@ -466,13 +377,11 @@ namespace UniRx.Operators
             this.resultSelector = resultSelector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel) {
             return new ZipLatest(4, this, observer, cancel).Run();
         }
 
-        class ZipLatest : NthZipLatestObserverBase<TR>
-        {
+        class ZipLatest : NthZipLatestObserverBase<TR> {
             readonly ZipLatestObservable<T1, T2, T3, T4, TR> parent;
             readonly object gate = new object();
             ZipLatestObserver<T1> c1;
@@ -481,13 +390,11 @@ namespace UniRx.Operators
             ZipLatestObserver<T4> c4;
 
             public ZipLatest(int length, ZipLatestObservable<T1, T2, T3, T4, TR> parent, IObserver<TR> observer, IDisposable cancel)
-                : base(length, observer, cancel)
-            {
+                : base(length, observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 c1 = new ZipLatestObserver<T1>(gate, this, 0);
                 c2 = new ZipLatestObserver<T2>(gate, this, 1);
                 c3 = new ZipLatestObserver<T3>(gate, this, 2);
@@ -501,33 +408,26 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(s1, s2, s3, s4);
             }
 
-            public override TR GetResult()
-            {
+            public override TR GetResult() {
                 return parent.resultSelector(c1.Value, c2.Value, c3.Value, c4.Value);
             }
 
-            public override void OnNext(TR value)
-            {
+            public override void OnNext(TR value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
 
 
-    internal class ZipLatestObservable<T1, T2, T3, T4, T5, TR> : OperatorObservableBase<TR>
-    {
+    internal class ZipLatestObservable<T1, T2, T3, T4, T5, TR> : OperatorObservableBase<TR> {
         IObservable<T1> source1;
         IObservable<T2> source2;
         IObservable<T3> source3;
@@ -548,8 +448,7 @@ namespace UniRx.Operators
                 source3.IsRequiredSubscribeOnCurrentThread() ||
                 source4.IsRequiredSubscribeOnCurrentThread() ||
                 source5.IsRequiredSubscribeOnCurrentThread() ||
-                false)
-        {
+                false) {
             this.source1 = source1;
             this.source2 = source2;
             this.source3 = source3;
@@ -558,13 +457,11 @@ namespace UniRx.Operators
             this.resultSelector = resultSelector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel) {
             return new ZipLatest(5, this, observer, cancel).Run();
         }
 
-        class ZipLatest : NthZipLatestObserverBase<TR>
-        {
+        class ZipLatest : NthZipLatestObserverBase<TR> {
             readonly ZipLatestObservable<T1, T2, T3, T4, T5, TR> parent;
             readonly object gate = new object();
             ZipLatestObserver<T1> c1;
@@ -574,13 +471,11 @@ namespace UniRx.Operators
             ZipLatestObserver<T5> c5;
 
             public ZipLatest(int length, ZipLatestObservable<T1, T2, T3, T4, T5, TR> parent, IObserver<TR> observer, IDisposable cancel)
-                : base(length, observer, cancel)
-            {
+                : base(length, observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 c1 = new ZipLatestObserver<T1>(gate, this, 0);
                 c2 = new ZipLatestObserver<T2>(gate, this, 1);
                 c3 = new ZipLatestObserver<T3>(gate, this, 2);
@@ -596,33 +491,26 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(s1, s2, s3, s4, s5);
             }
 
-            public override TR GetResult()
-            {
+            public override TR GetResult() {
                 return parent.resultSelector(c1.Value, c2.Value, c3.Value, c4.Value, c5.Value);
             }
 
-            public override void OnNext(TR value)
-            {
+            public override void OnNext(TR value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
 
 
-    internal class ZipLatestObservable<T1, T2, T3, T4, T5, T6, TR> : OperatorObservableBase<TR>
-    {
+    internal class ZipLatestObservable<T1, T2, T3, T4, T5, T6, TR> : OperatorObservableBase<TR> {
         IObservable<T1> source1;
         IObservable<T2> source2;
         IObservable<T3> source3;
@@ -646,8 +534,7 @@ namespace UniRx.Operators
                 source4.IsRequiredSubscribeOnCurrentThread() ||
                 source5.IsRequiredSubscribeOnCurrentThread() ||
                 source6.IsRequiredSubscribeOnCurrentThread() ||
-                false)
-        {
+                false) {
             this.source1 = source1;
             this.source2 = source2;
             this.source3 = source3;
@@ -657,13 +544,11 @@ namespace UniRx.Operators
             this.resultSelector = resultSelector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel) {
             return new ZipLatest(6, this, observer, cancel).Run();
         }
 
-        class ZipLatest : NthZipLatestObserverBase<TR>
-        {
+        class ZipLatest : NthZipLatestObserverBase<TR> {
             readonly ZipLatestObservable<T1, T2, T3, T4, T5, T6, TR> parent;
             readonly object gate = new object();
             ZipLatestObserver<T1> c1;
@@ -674,13 +559,11 @@ namespace UniRx.Operators
             ZipLatestObserver<T6> c6;
 
             public ZipLatest(int length, ZipLatestObservable<T1, T2, T3, T4, T5, T6, TR> parent, IObserver<TR> observer, IDisposable cancel)
-                : base(length, observer, cancel)
-            {
+                : base(length, observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 c1 = new ZipLatestObserver<T1>(gate, this, 0);
                 c2 = new ZipLatestObserver<T2>(gate, this, 1);
                 c3 = new ZipLatestObserver<T3>(gate, this, 2);
@@ -698,33 +581,26 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(s1, s2, s3, s4, s5, s6);
             }
 
-            public override TR GetResult()
-            {
+            public override TR GetResult() {
                 return parent.resultSelector(c1.Value, c2.Value, c3.Value, c4.Value, c5.Value, c6.Value);
             }
 
-            public override void OnNext(TR value)
-            {
+            public override void OnNext(TR value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
 
 
-    internal class ZipLatestObservable<T1, T2, T3, T4, T5, T6, T7, TR> : OperatorObservableBase<TR>
-    {
+    internal class ZipLatestObservable<T1, T2, T3, T4, T5, T6, T7, TR> : OperatorObservableBase<TR> {
         IObservable<T1> source1;
         IObservable<T2> source2;
         IObservable<T3> source3;
@@ -751,8 +627,7 @@ namespace UniRx.Operators
                 source5.IsRequiredSubscribeOnCurrentThread() ||
                 source6.IsRequiredSubscribeOnCurrentThread() ||
                 source7.IsRequiredSubscribeOnCurrentThread() ||
-                false)
-        {
+                false) {
             this.source1 = source1;
             this.source2 = source2;
             this.source3 = source3;
@@ -763,13 +638,11 @@ namespace UniRx.Operators
             this.resultSelector = resultSelector;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<TR> observer, IDisposable cancel) {
             return new ZipLatest(7, this, observer, cancel).Run();
         }
 
-        class ZipLatest : NthZipLatestObserverBase<TR>
-        {
+        class ZipLatest : NthZipLatestObserverBase<TR> {
             readonly ZipLatestObservable<T1, T2, T3, T4, T5, T6, T7, TR> parent;
             readonly object gate = new object();
             ZipLatestObserver<T1> c1;
@@ -781,13 +654,11 @@ namespace UniRx.Operators
             ZipLatestObserver<T7> c7;
 
             public ZipLatest(int length, ZipLatestObservable<T1, T2, T3, T4, T5, T6, T7, TR> parent, IObserver<TR> observer, IDisposable cancel)
-                : base(length, observer, cancel)
-            {
+                : base(length, observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 c1 = new ZipLatestObserver<T1>(gate, this, 0);
                 c2 = new ZipLatestObserver<T2>(gate, this, 1);
                 c3 = new ZipLatestObserver<T3>(gate, this, 2);
@@ -807,26 +678,20 @@ namespace UniRx.Operators
                 return StableCompositeDisposable.Create(s1, s2, s3, s4, s5, s6, s7);
             }
 
-            public override TR GetResult()
-            {
+            public override TR GetResult() {
                 return parent.resultSelector(c1.Value, c2.Value, c3.Value, c4.Value, c5.Value, c6.Value, c7.Value);
             }
 
-            public override void OnNext(TR value)
-            {
+            public override void OnNext(TR value) {
                 base.observer.OnNext(value);
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
@@ -835,21 +700,18 @@ namespace UniRx.Operators
 
     // Nth infrastructure
 
-    internal interface IZipLatestObservable
-    {
+    internal interface IZipLatestObservable {
         void Publish(int index);
         void Fail(Exception error);
         void Done(int index);
     }
 
-    internal abstract class NthZipLatestObserverBase<T> : OperatorObserverBase<T, T>, IZipLatestObservable
-    {
+    internal abstract class NthZipLatestObserverBase<T> : OperatorObserverBase<T, T>, IZipLatestObservable {
         readonly int length;
         readonly bool[] isStarted;
         readonly bool[] isCompleted;
 
-        public NthZipLatestObserverBase(int length, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-        {
+        public NthZipLatestObserverBase(int length, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
             this.length = length;
             this.isStarted = new bool[length];
             this.isCompleted = new bool[length];
@@ -858,16 +720,13 @@ namespace UniRx.Operators
         public abstract T GetResult();
 
         // operators in lock
-        public void Publish(int index)
-        {
+        public void Publish(int index) {
             isStarted[index] = true;
 
             var hasOnCompleted = false;
             var allValueStarted = true;
-            for (int i = 0; i < length; i++)
-            {
-                if (!isStarted[i])
-                {
+            for (int i = 0; i < length; i++) {
+                if (!isStarted[i]) {
                     allValueStarted = false;
                     break;
                 }
@@ -875,79 +734,57 @@ namespace UniRx.Operators
                 if (isCompleted[i]) hasOnCompleted = true;
             }
 
-            if (allValueStarted)
-            {
+            if (allValueStarted) {
                 var result = default(T);
-                try
-                {
+                try {
                     result = GetResult();
-                }
-                catch (Exception ex)
-                {
-                    try { observer.OnError(ex); }
-                    finally { Dispose(); }
+                } catch (Exception ex) {
+                    try { observer.OnError(ex); } finally { Dispose(); }
                     return;
                 }
                 OnNext(result);
 
-                if (hasOnCompleted)
-                {
-                    try { observer.OnCompleted(); }
-                    finally { Dispose(); }
+                if (hasOnCompleted) {
+                    try { observer.OnCompleted(); } finally { Dispose(); }
                     return;
-                }
-                else
-                {
+                } else {
                     Array.Clear(isStarted, 0, length); // reset
                     return;
                 }
-            }
-            else
-            {
-                for (int i = 0; i < length; i++)
-                {
+            } else {
+                for (int i = 0; i < length; i++) {
                     if (i == index) continue;
-                    if (isCompleted[i] && !isStarted[i])
-                    {
-                        try { observer.OnCompleted(); }
-                        finally { Dispose(); }
+                    if (isCompleted[i] && !isStarted[i]) {
+                        try { observer.OnCompleted(); } finally { Dispose(); }
                         return;
                     }
                 }
             }
         }
 
-        public void Done(int index)
-        {
+        public void Done(int index) {
             isCompleted[index] = true;
 
             var allTrue = true;
-            for (int i = 0; i < length; i++)
-            {
-                if (!isCompleted[i])
-                {
+            for (int i = 0; i < length; i++) {
+                if (!isCompleted[i]) {
                     allTrue = false;
                     break;
                 }
             }
 
-            if (allTrue)
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            if (allTrue) {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
 
-        public void Fail(Exception error)
-        {
-            try { observer.OnError(error); }
-            finally { Dispose(); }
+        public void Fail(Exception error) {
+            try { observer.OnError(error); } finally { Dispose(); }
         }
     }
 
     // Nth
-    internal class ZipLatestObserver<T> : IObserver<T>
-    {
+    internal class ZipLatestObserver<T> : IObserver<T> {
         readonly object gate;
         readonly IZipLatestObservable parent;
         readonly int index;
@@ -955,34 +792,27 @@ namespace UniRx.Operators
 
         public T Value { get { return value; } }
 
-        public ZipLatestObserver(object gate, IZipLatestObservable parent, int index)
-        {
+        public ZipLatestObserver(object gate, IZipLatestObservable parent, int index) {
             this.gate = gate;
             this.parent = parent;
             this.index = index;
         }
 
-        public void OnNext(T value)
-        {
-            lock (gate)
-            {
+        public void OnNext(T value) {
+            lock (gate) {
                 this.value = value;
                 parent.Publish(index);
             }
         }
 
-        public void OnError(Exception error)
-        {
-            lock (gate)
-            {
+        public void OnError(Exception error) {
+            lock (gate) {
                 parent.Fail(error);
             }
         }
 
-        public void OnCompleted()
-        {
-            lock (gate)
-            {
+        public void OnCompleted() {
+            lock (gate) {
                 parent.Done(index);
             }
         }

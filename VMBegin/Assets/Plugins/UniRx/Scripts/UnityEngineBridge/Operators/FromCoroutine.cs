@@ -2,20 +2,16 @@
 using System.Collections;
 using System.Threading;
 
-namespace UniRx.Operators
-{
-    internal class FromCoroutineObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class FromCoroutineObservable<T> : OperatorObservableBase<T> {
         readonly Func<IObserver<T>, CancellationToken, IEnumerator> coroutine;
 
         public FromCoroutineObservable(Func<IObserver<T>, CancellationToken, IEnumerator> coroutine)
-            : base(false)
-        {
+            : base(false) {
             this.coroutine = coroutine;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             var fromCoroutineObserver = new FromCoroutine(observer, cancel);
 
 #if (NETFX_CORE || NET_4_6 || NET_STANDARD_2_0 || UNITY_WSA_10_0)
@@ -31,53 +27,40 @@ namespace UniRx.Operators
             return moreCancel;
         }
 
-        class FromCoroutine : OperatorObserverBase<T, T>
-        {
-            public FromCoroutine(IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+        class FromCoroutine : OperatorObserverBase<T, T> {
+            public FromCoroutine(IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
             }
 
-            public override void OnNext(T value)
-            {
-                try
-                {
+            public override void OnNext(T value) {
+                try {
                     base.observer.OnNext(value);
-                }
-                catch
-                {
+                } catch {
                     Dispose();
                     throw;
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }
 
-    internal class FromMicroCoroutineObservable<T> : OperatorObservableBase<T>
-    {
+    internal class FromMicroCoroutineObservable<T> : OperatorObservableBase<T> {
         readonly Func<IObserver<T>, CancellationToken, IEnumerator> coroutine;
         readonly FrameCountType frameCountType;
 
         public FromMicroCoroutineObservable(Func<IObserver<T>, CancellationToken, IEnumerator> coroutine, FrameCountType frameCountType)
-            : base(false)
-        {
+            : base(false) {
             this.coroutine = coroutine;
             this.frameCountType = frameCountType;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
             var microCoroutineObserver = new FromMicroCoroutine(observer, cancel);
 
 #if (NETFX_CORE || NET_4_6 || NET_STANDARD_2_0 || UNITY_WSA_10_0)
@@ -88,8 +71,7 @@ namespace UniRx.Operators
             var token = new CancellationToken(moreCancel);
 #endif
 
-            switch (frameCountType)
-            {
+            switch (frameCountType) {
                 case FrameCountType.Update:
                     MainThreadDispatcher.StartUpdateMicroCoroutine(coroutine(microCoroutineObserver, token));
                     break;
@@ -106,35 +88,25 @@ namespace UniRx.Operators
             return moreCancel;
         }
 
-        class FromMicroCoroutine : OperatorObserverBase<T, T>
-        {
-            public FromMicroCoroutine(IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+        class FromMicroCoroutine : OperatorObserverBase<T, T> {
+            public FromMicroCoroutine(IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
             }
 
-            public override void OnNext(T value)
-            {
-                try
-                {
+            public override void OnNext(T value) {
+                try {
                     base.observer.OnNext(value);
-                }
-                catch
-                {
+                } catch {
                     Dispose();
                     throw;
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                try { observer.OnError(error); }
-                finally { Dispose(); }
+            public override void OnError(Exception error) {
+                try { observer.OnError(error); } finally { Dispose(); }
             }
 
-            public override void OnCompleted()
-            {
-                try { observer.OnCompleted(); }
-                finally { Dispose(); }
+            public override void OnCompleted() {
+                try { observer.OnCompleted(); } finally { Dispose(); }
             }
         }
     }

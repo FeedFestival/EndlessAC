@@ -4,27 +4,22 @@
 using System.Collections;
 using UnityEngine;
 
-namespace UniRx.Examples
-{
-    public class Sample07_OrchestratIEnumerator : MonoBehaviour
-    {
+namespace UniRx.Examples {
+    public class Sample07_OrchestratIEnumerator : MonoBehaviour {
         // two coroutines
-        IEnumerator AsyncA()
-        {
+        IEnumerator AsyncA() {
             Debug.Log("a start");
             yield return new WaitForSeconds(3);
             Debug.Log("a end");
         }
 
-        IEnumerator AsyncB()
-        {
+        IEnumerator AsyncB() {
             Debug.Log("b start");
             yield return new WaitForEndOfFrame();
             Debug.Log("b end");
         }
 
-        void Start()
-        {
+        void Start() {
             // after completed AsyncA, run AsyncB as continuous routine.
             // UniRx expands SelectMany(IEnumerator) as SelectMany(IEnumerator.ToObservable())
             var cancel = Observable.FromCoroutine(AsyncA)

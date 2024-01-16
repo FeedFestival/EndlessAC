@@ -8,13 +8,11 @@
 using System;
 using System.Threading;
 
-namespace UniRx
-{
+namespace UniRx {
     /// <summary>
     /// Represents a disposable resource that has an associated <seealso cref="T:System.Threading.CancellationToken"/> that will be set to the cancellation requested state upon disposal.
     /// </summary>
-    public sealed class CancellationDisposable : ICancelable
-    {
+    public sealed class CancellationDisposable : ICancelable {
         private readonly CancellationTokenSource _cts;
 
         /// <summary>
@@ -22,8 +20,7 @@ namespace UniRx
         /// </summary>
         /// <param name="cts"><seealso cref="T:System.Threading.CancellationTokenSource"/> used for cancellation.</param>
         /// <exception cref="ArgumentNullException"><paramref name="cts"/> is null.</exception>
-        public CancellationDisposable(CancellationTokenSource cts)
-        {
+        public CancellationDisposable(CancellationTokenSource cts) {
             if (cts == null)
                 throw new ArgumentNullException("cts");
 
@@ -34,31 +31,27 @@ namespace UniRx
         /// Initializes a new instance of the <see cref="T:System.Reactive.Disposables.CancellationDisposable"/> class that uses a new <seealso cref="T:System.Threading.CancellationTokenSource"/>.
         /// </summary>
         public CancellationDisposable()
-            : this(new CancellationTokenSource())
-        {
+            : this(new CancellationTokenSource()) {
         }
 
         /// <summary>
         /// Gets the <see cref="T:System.Threading.CancellationToken"/> used by this CancellationDisposable.
         /// </summary>
-        public CancellationToken Token
-        {
+        public CancellationToken Token {
             get { return _cts.Token; }
         }
 
         /// <summary>
         /// Cancels the underlying <seealso cref="T:System.Threading.CancellationTokenSource"/>.
         /// </summary>
-        public void Dispose()
-        {
+        public void Dispose() {
             _cts.Cancel();
         }
 
         /// <summary>
         /// Gets a value that indicates whether the object is disposed.
         /// </summary>
-        public bool IsDisposed
-        {
+        public bool IsDisposed {
             get { return _cts.IsCancellationRequested; }
         }
     }

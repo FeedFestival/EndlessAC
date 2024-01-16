@@ -1,40 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UniRx.Operators
-{
-    internal class MergeObservable<T> : OperatorObservableBase<T>
-    {
+namespace UniRx.Operators {
+    internal class MergeObservable<T> : OperatorObservableBase<T> {
         private readonly IObservable<IObservable<T>> sources;
         private readonly int maxConcurrent;
 
         public MergeObservable(IObservable<IObservable<T>> sources, bool isRequiredSubscribeOnCurrentThread)
-            : base(isRequiredSubscribeOnCurrentThread)
-        {
+            : base(isRequiredSubscribeOnCurrentThread) {
             this.sources = sources;
         }
 
         public MergeObservable(IObservable<IObservable<T>> sources, int maxConcurrent, bool isRequiredSubscribeOnCurrentThread)
-            : base(isRequiredSubscribeOnCurrentThread)
-        {
+            : base(isRequiredSubscribeOnCurrentThread) {
             this.sources = sources;
             this.maxConcurrent = maxConcurrent;
         }
 
-        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel)
-        {
-            if (maxConcurrent > 0)
-            {
+        protected override IDisposable SubscribeCore(IObserver<T> observer, IDisposable cancel) {
+            if (maxConcurrent > 0) {
                 return new MergeConcurrentObserver(this, observer, cancel).Run();
-            }
-            else
-            {
+            } else {
                 return new MergeOuterObserver(this, observer, cancel).Run();
             }
         }
 
-        class MergeOuterObserver : OperatorObserverBase<IObservable<T>, T>
-        {
+        class MergeOuterObserver : OperatorObserverBase<IObservable<T>, T> {
             readonly MergeObservable<T> parent;
 
             CompositeDisposable collectionDisposable;
@@ -42,13 +33,11 @@ namespace UniRx.Operators
             object gate = new object();
             bool isStopped = false;
 
-            public MergeOuterObserver(MergeObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public MergeOuterObserver(MergeObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 collectionDisposable = new CompositeDisposable();
                 sourceDisposable = new SingleAssignmentDisposable();
                 collectionDisposable.Add(sourceDisposable);
@@ -57,73 +46,56 @@ namespace UniRx.Operators
                 return collectionDisposable;
             }
 
-            public override void OnNext(IObservable<T> value)
-            {
+            public override void OnNext(IObservable<T> value) {
                 var disposable = new SingleAssignmentDisposable();
                 collectionDisposable.Add(disposable);
                 var collectionObserver = new Merge(this, disposable);
                 disposable.Disposable = value.Subscribe(collectionObserver);
             }
 
-            public override void OnError(Exception error)
-            {
-                lock (gate)
-                {
+            public override void OnError(Exception error) {
+                lock (gate) {
                     try { observer.OnError(error); } finally { Dispose(); };
                 }
             }
 
-            public override void OnCompleted()
-            {
+            public override void OnCompleted() {
                 isStopped = true;
-                if (collectionDisposable.Count == 1)
-                {
-                    lock (gate)
-                    {
+                if (collectionDisposable.Count == 1) {
+                    lock (gate) {
                         try { observer.OnCompleted(); } finally { Dispose(); };
                     }
-                }
-                else
-                {
+                } else {
                     sourceDisposable.Dispose();
                 }
             }
 
-            class Merge : OperatorObserverBase<T, T>
-            {
+            class Merge : OperatorObserverBase<T, T> {
                 readonly MergeOuterObserver parent;
                 readonly IDisposable cancel;
 
                 public Merge(MergeOuterObserver parent, IDisposable cancel)
-                    : base(parent.observer, cancel)
-                {
+                    : base(parent.observer, cancel) {
                     this.parent = parent;
                     this.cancel = cancel;
                 }
 
-                public override void OnNext(T value)
-                {
-                    lock (parent.gate)
-                    {
+                public override void OnNext(T value) {
+                    lock (parent.gate) {
                         base.observer.OnNext(value);
                     }
                 }
 
-                public override void OnError(Exception error)
-                {
-                    lock (parent.gate)
-                    {
+                public override void OnError(Exception error) {
+                    lock (parent.gate) {
                         try { observer.OnError(error); } finally { Dispose(); };
                     }
                 }
 
-                public override void OnCompleted()
-                {
+                public override void OnCompleted() {
                     parent.collectionDisposable.Remove(cancel);
-                    if (parent.isStopped && parent.collectionDisposable.Count == 1)
-                    {
-                        lock (parent.gate)
-                        {
+                    if (parent.isStopped && parent.collectionDisposable.Count == 1) {
+                        lock (parent.gate) {
                             try { observer.OnCompleted(); } finally { Dispose(); };
                         }
                     }
@@ -131,8 +103,7 @@ namespace UniRx.Operators
             }
         }
 
-        class MergeConcurrentObserver : OperatorObserverBase<IObservable<T>, T>
-        {
+        class MergeConcurrentObserver : OperatorObserverBase<IObservable<T>, T> {
             readonly MergeObservable<T> parent;
 
             CompositeDisposable collectionDisposable;
@@ -144,13 +115,11 @@ namespace UniRx.Operators
             Queue<IObservable<T>> q;
             int activeCount;
 
-            public MergeConcurrentObserver(MergeObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel)
-            {
+            public MergeConcurrentObserver(MergeObservable<T> parent, IObserver<T> observer, IDisposable cancel) : base(observer, cancel) {
                 this.parent = parent;
             }
 
-            public IDisposable Run()
-            {
+            public IDisposable Run() {
                 q = new Queue<IObservable<T>>();
                 activeCount = 0;
 
@@ -162,97 +131,72 @@ namespace UniRx.Operators
                 return collectionDisposable;
             }
 
-            public override void OnNext(IObservable<T> value)
-            {
-                lock (gate)
-                {
-                    if (activeCount < parent.maxConcurrent)
-                    {
+            public override void OnNext(IObservable<T> value) {
+                lock (gate) {
+                    if (activeCount < parent.maxConcurrent) {
                         activeCount++;
                         Subscribe(value);
-                    }
-                    else
-                    {
+                    } else {
                         q.Enqueue(value);
                     }
                 }
             }
 
-            public override void OnError(Exception error)
-            {
-                lock (gate)
-                {
+            public override void OnError(Exception error) {
+                lock (gate) {
                     try { observer.OnError(error); } finally { Dispose(); };
                 }
             }
 
-            public override void OnCompleted()
-            {
-                lock (gate)
-                {
+            public override void OnCompleted() {
+                lock (gate) {
                     isStopped = true;
-                    if (activeCount == 0)
-                    {
+                    if (activeCount == 0) {
                         try { observer.OnCompleted(); } finally { Dispose(); };
-                    }
-                    else
-                    {
+                    } else {
                         sourceDisposable.Dispose();
                     }
                 }
             }
 
-            void Subscribe(IObservable<T> innerSource)
-            {
+            void Subscribe(IObservable<T> innerSource) {
                 var disposable = new SingleAssignmentDisposable();
                 collectionDisposable.Add(disposable);
                 var collectionObserver = new Merge(this, disposable);
                 disposable.Disposable = innerSource.Subscribe(collectionObserver);
             }
 
-            class Merge : OperatorObserverBase<T, T>
-            {
+            class Merge : OperatorObserverBase<T, T> {
                 readonly MergeConcurrentObserver parent;
                 readonly IDisposable cancel;
 
                 public Merge(MergeConcurrentObserver parent, IDisposable cancel)
-                    : base(parent.observer, cancel)
-                {
+                    : base(parent.observer, cancel) {
                     this.parent = parent;
                     this.cancel = cancel;
                 }
 
-                public override void OnNext(T value)
-                {
-                    lock (parent.gate)
-                    {
+                public override void OnNext(T value) {
+                    lock (parent.gate) {
                         base.observer.OnNext(value);
                     }
                 }
 
-                public override void OnError(Exception error)
-                {
-                    lock (parent.gate)
-                    {
+                public override void OnError(Exception error) {
+                    lock (parent.gate) {
                         try { observer.OnError(error); } finally { Dispose(); };
                     }
                 }
 
-                public override void OnCompleted()
-                {
+                public override void OnCompleted() {
                     parent.collectionDisposable.Remove(cancel);
-                    lock (parent.gate)
-                    {
-                        if (parent.q.Count > 0)
-                        {
+                    lock (parent.gate) {
+                        if (parent.q.Count > 0) {
                             var source = parent.q.Dequeue();
                             parent.Subscribe(source);
-                        }
-                        else
-                        {
+                        } else {
                             parent.activeCount--;
-                            if (parent.isStopped && parent.activeCount == 0)
-                            {
+                            if (parent.isStopped && parent.activeCount == 0) {
                                 try { observer.OnCompleted(); } finally { Dispose(); };
                             }
                         }

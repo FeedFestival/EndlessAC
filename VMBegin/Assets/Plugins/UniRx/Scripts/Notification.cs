@@ -14,8 +14,7 @@ using UniRx.InternalUtil;
 #pragma warning disable 0659
 #pragma warning disable 0661
 
-namespace UniRx
-{
+namespace UniRx {
     /// <summary>
     /// Provides a mechanism for receiving push-based notifications and returning a response.
     /// </summary>
@@ -27,8 +26,7 @@ namespace UniRx
     /// The type of the result returned from the observer's notification handlers.
     /// This type parameter is covariant. That is, you can use either the type you specified or any type that is more derived. For more information about covariance and contravariance, see Covariance and Contravariance in Generics.
     /// </typeparam>
-    public interface IObserver<TValue, TResult>
-    {
+    public interface IObserver<TValue, TResult> {
         /// <summary>
         /// Notifies the observer of a new element in the sequence.
         /// </summary>
@@ -53,8 +51,7 @@ namespace UniRx
     /// <summary>
     /// Indicates the type of a notification.
     /// </summary>
-    public enum NotificationKind
-    {
+    public enum NotificationKind {
         /// <summary>
         /// Represents an OnNext notification.
         /// </summary>
@@ -76,44 +73,38 @@ namespace UniRx
     /// </summary>
     /// <typeparam name="T">The type of the elements received by the observer.</typeparam>
     [Serializable]
-    public abstract class Notification<T> : IEquatable<Notification<T>>
-    {
+    public abstract class Notification<T> : IEquatable<Notification<T>> {
         /// <summary>
         /// Default constructor used by derived types.
         /// </summary>
-        protected internal Notification()
-        {
+        protected internal Notification() {
         }
 
         /// <summary>
         /// Returns the value of an OnNext notification or throws an exception.
         /// </summary>
-        public abstract T Value
-        {
+        public abstract T Value {
             get;
         }
 
         /// <summary>
         /// Returns a value that indicates whether the notification has a value.
         /// </summary>
-        public abstract bool HasValue
-        {
+        public abstract bool HasValue {
             get;
         }
 
         /// <summary>
         /// Returns the exception of an OnError notification or returns null.
         /// </summary>
-        public abstract Exception Exception
-        {
+        public abstract Exception Exception {
             get;
         }
 
         /// <summary>
         /// Gets the kind of notification that is represented.
         /// </summary>
-        public abstract NotificationKind Kind
-        {
+        public abstract NotificationKind Kind {
             get;
         }
 
@@ -122,15 +113,13 @@ namespace UniRx
         /// </summary>
         [DebuggerDisplay("OnNext({Value})")]
         [Serializable]
-        internal sealed class OnNextNotification : Notification<T>
-        {
+        internal sealed class OnNextNotification : Notification<T> {
             T value;
 
             /// <summary>
             /// Constructs a notification of a new value.
             /// </summary>
-            public OnNextNotification(T value)
-            {
+            public OnNextNotification(T value) {
                 this.value = value;
             }
 
@@ -157,16 +146,14 @@ namespace UniRx
             /// <summary>
             /// Returns the hash code for this instance.
             /// </summary>
-            public override int GetHashCode()
-            {
+            public override int GetHashCode() {
                 return EqualityComparer<T>.Default.GetHashCode(Value);
             }
 
             /// <summary>
             /// Indicates whether this instance and a specified object are equal.
             /// </summary>
-            public override bool Equals(Notification<T> other)
-            {
+            public override bool Equals(Notification<T> other) {
                 if (Object.ReferenceEquals(this, other))
                     return true;
                 if (Object.ReferenceEquals(other, null))
@@ -179,8 +166,7 @@ namespace UniRx
             /// <summary>
             /// Returns a string representation of this instance.
             /// </summary>
-            public override string ToString()
-            {
+            public override string ToString() {
                 return String.Format(CultureInfo.CurrentCulture, "OnNext({0})", Value);
             }
 
@@ -188,8 +174,7 @@ namespace UniRx
             /// Invokes the observer's method corresponding to the notification.
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
-            public override void Accept(IObserver<T> observer)
-            {
+            public override void Accept(IObserver<T> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -201,8 +186,7 @@ namespace UniRx
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(IObserver<T, TResult> observer)
-            {
+            public override TResult Accept<TResult>(IObserver<T, TResult> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -215,8 +199,7 @@ namespace UniRx
             /// <param name="onNext">Delegate to invoke for an OnNext notification.</param>
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
-            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-            {
+            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -234,8 +217,7 @@ namespace UniRx
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
-            {
+            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -256,15 +238,13 @@ namespace UniRx
 #if !NO_SERIALIZABLE
         [Serializable]
 #endif
-        internal sealed class OnErrorNotification : Notification<T>
-        {
+        internal sealed class OnErrorNotification : Notification<T> {
             Exception exception;
 
             /// <summary>
             /// Constructs a notification of an exception.
             /// </summary>
-            public OnErrorNotification(Exception exception)
-            {
+            public OnErrorNotification(Exception exception) {
                 this.exception = exception;
             }
 
@@ -291,16 +271,14 @@ namespace UniRx
             /// <summary>
             /// Returns the hash code for this instance.
             /// </summary>
-            public override int GetHashCode()
-            {
+            public override int GetHashCode() {
                 return Exception.GetHashCode();
             }
 
             /// <summary>
             /// Indicates whether this instance and other are equal.
             /// </summary>
-            public override bool Equals(Notification<T> other)
-            {
+            public override bool Equals(Notification<T> other) {
                 if (Object.ReferenceEquals(this, other))
                     return true;
                 if (Object.ReferenceEquals(other, null))
@@ -313,8 +291,7 @@ namespace UniRx
             /// <summary>
             /// Returns a string representation of this instance.
             /// </summary>
-            public override string ToString()
-            {
+            public override string ToString() {
                 return String.Format(CultureInfo.CurrentCulture, "OnError({0})", Exception.GetType().FullName);
             }
 
@@ -322,8 +299,7 @@ namespace UniRx
             /// Invokes the observer's method corresponding to the notification.
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
-            public override void Accept(IObserver<T> observer)
-            {
+            public override void Accept(IObserver<T> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -335,8 +311,7 @@ namespace UniRx
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(IObserver<T, TResult> observer)
-            {
+            public override TResult Accept<TResult>(IObserver<T, TResult> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -349,8 +324,7 @@ namespace UniRx
             /// <param name="onNext">Delegate to invoke for an OnNext notification.</param>
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
-            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-            {
+            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -368,8 +342,7 @@ namespace UniRx
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
-            {
+            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -386,13 +359,11 @@ namespace UniRx
         /// </summary>
         [DebuggerDisplay("OnCompleted()")]
         [Serializable]
-        internal sealed class OnCompletedNotification : Notification<T>
-        {
+        internal sealed class OnCompletedNotification : Notification<T> {
             /// <summary>
             /// Constructs a notification of the end of a sequence.
             /// </summary>
-            public OnCompletedNotification()
-            {
+            public OnCompletedNotification() {
             }
 
             /// <summary>
@@ -418,16 +389,14 @@ namespace UniRx
             /// <summary>
             /// Returns the hash code for this instance.
             /// </summary>
-            public override int GetHashCode()
-            {
+            public override int GetHashCode() {
                 return typeof(T).GetHashCode() ^ 8510;
             }
 
             /// <summary>
             /// Indicates whether this instance and other are equal.
             /// </summary>
-            public override bool Equals(Notification<T> other)
-            {
+            public override bool Equals(Notification<T> other) {
                 if (Object.ReferenceEquals(this, other))
                     return true;
                 if (Object.ReferenceEquals(other, null))
@@ -438,8 +407,7 @@ namespace UniRx
             /// <summary>
             /// Returns a string representation of this instance.
             /// </summary>
-            public override string ToString()
-            {
+            public override string ToString() {
                 return "OnCompleted()";
             }
 
@@ -447,8 +415,7 @@ namespace UniRx
             /// Invokes the observer's method corresponding to the notification.
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
-            public override void Accept(IObserver<T> observer)
-            {
+            public override void Accept(IObserver<T> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -460,8 +427,7 @@ namespace UniRx
             /// </summary>
             /// <param name="observer">Observer to invoke the notification on.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(IObserver<T, TResult> observer)
-            {
+            public override TResult Accept<TResult>(IObserver<T, TResult> observer) {
                 if (observer == null)
                     throw new ArgumentNullException("observer");
 
@@ -474,8 +440,7 @@ namespace UniRx
             /// <param name="onNext">Delegate to invoke for an OnNext notification.</param>
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
-            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted)
-            {
+            public override void Accept(Action<T> onNext, Action<Exception> onError, Action onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -493,8 +458,7 @@ namespace UniRx
             /// <param name="onError">Delegate to invoke for an OnError notification.</param>
             /// <param name="onCompleted">Delegate to invoke for an OnCompleted notification.</param>
             /// <returns>Result produced by the observation.</returns>
-            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted)
-            {
+            public override TResult Accept<TResult>(Func<T, TResult> onNext, Func<Exception, TResult> onError, Func<TResult> onCompleted) {
                 if (onNext == null)
                     throw new ArgumentNullException("onNext");
                 if (onError == null)
@@ -529,8 +493,7 @@ namespace UniRx
         /// This means two Notification&lt;T&gt; objects can be equal even though they don't represent the same observer method call, but have the same Kind and have equal parameters passed to the observer method.
         /// In case one wants to determine whether two Notification&lt;T&gt; objects represent the same observer method call, use Object.ReferenceEquals identity equality instead.
         /// </remarks>
-        public static bool operator ==(Notification<T> left, Notification<T> right)
-        {
+        public static bool operator ==(Notification<T> left, Notification<T> right) {
             if (object.ReferenceEquals(left, right))
                 return true;
 
@@ -551,8 +514,7 @@ namespace UniRx
         /// This means two Notification&lt;T&gt; objects can be equal even though they don't represent the same observer method call, but have the same Kind and have equal parameters passed to the observer method.
         /// In case one wants to determine whether two Notification&lt;T&gt; objects represent a different observer method call, use Object.ReferenceEquals identity equality instead.
         /// </remarks>
-        public static bool operator !=(Notification<T> left, Notification<T> right)
-        {
+        public static bool operator !=(Notification<T> left, Notification<T> right) {
             return !(left == right);
         }
 
@@ -566,8 +528,7 @@ namespace UniRx
         /// This means two Notification&lt;T&gt; objects can be equal even though they don't represent the same observer method call, but have the same Kind and have equal parameters passed to the observer method.
         /// In case one wants to determine whether two Notification&lt;T&gt; objects represent the same observer method call, use Object.ReferenceEquals identity equality instead.
         /// </remarks>
-        public override bool Equals(object obj)
-        {
+        public override bool Equals(object obj) {
             return Equals(obj as Notification<T>);
         }
 
@@ -607,8 +568,7 @@ namespace UniRx
         /// Returns an observable sequence with a single notification, using the immediate scheduler.
         /// </summary>
         /// <returns>The observable sequence that surfaces the behavior of the notification upon subscription.</returns>
-        public IObservable<T> ToObservable()
-        {
+        public IObservable<T> ToObservable() {
             return this.ToObservable(Scheduler.Immediate);
         }
 
@@ -617,13 +577,11 @@ namespace UniRx
         /// </summary>
         /// <param name="scheduler">Scheduler to send out the notification calls on.</param>
         /// <returns>The observable sequence that surfaces the behavior of the notification upon subscription.</returns>
-        public IObservable<T> ToObservable(IScheduler scheduler)
-        {
+        public IObservable<T> ToObservable(IScheduler scheduler) {
             if (scheduler == null)
                 throw new ArgumentNullException("scheduler");
 
-            return Observable.Create<T>(observer => scheduler.Schedule(() =>
-            {
+            return Observable.Create<T>(observer => scheduler.Schedule(() => {
                 this.Accept(observer);
                 if (this.Kind == NotificationKind.OnNext)
                     observer.OnCompleted();
@@ -634,16 +592,14 @@ namespace UniRx
     /// <summary>
     /// Provides a set of static methods for constructing notifications.
     /// </summary>
-    public static class Notification
-    {
+    public static class Notification {
         /// <summary>
         /// Creates an object that represents an OnNext notification to an observer.
         /// </summary>
         /// <typeparam name="T">The type of the elements received by the observer. Upon dematerialization of the notifications into an observable sequence, this type is used as the element type for the sequence.</typeparam>
         /// <param name="value">The value contained in the notification.</param>
         /// <returns>The OnNext notification containing the value.</returns>
-        public static Notification<T> CreateOnNext<T>(T value)
-        {
+        public static Notification<T> CreateOnNext<T>(T value) {
             return new Notification<T>.OnNextNotification(value);
         }
 
@@ -654,8 +610,7 @@ namespace UniRx
         /// <param name="error">The exception contained in the notification.</param>
         /// <returns>The OnError notification containing the exception.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="error"/> is null.</exception>
-        public static Notification<T> CreateOnError<T>(Exception error)
-        {
+        public static Notification<T> CreateOnError<T>(Exception error) {
             if (error == null)
                 throw new ArgumentNullException("error");
 
@@ -667,8 +622,7 @@ namespace UniRx
         /// </summary>
         /// <typeparam name="T">The type of the elements received by the observer. Upon dematerialization of the notifications into an observable sequence, this type is used as the element type for the sequence.</typeparam>
         /// <returns>The OnCompleted notification.</returns>
-        public static Notification<T> CreateOnCompleted<T>()
-        {
+        public static Notification<T> CreateOnCompleted<T>() {
             return new Notification<T>.OnCompletedNotification();
         }
     }

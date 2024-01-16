@@ -1,14 +1,11 @@
 using System.IO;
 using UnityEngine;
 
-namespace GameScrypt.GSUtils
-{
-    public static class GSStreamingAssets
-    {
+namespace GameScrypt.GSUtils {
+    public static class GSStreamingAssets {
         public static readonly string ASSETS_PATH = "Assets/";
 
-        public static string GetStreamingAssetsFilePath(string assetsFilePath, bool debugLog = false)
-        {
+        public static string GetStreamingAssetsFilePath(string assetsFilePath, bool debugLog = false) {
 #if UNITY_EDITOR
             return string.Format(ASSETS_PATH + @"StreamingAssets/{0}", assetsFilePath);
 #else
@@ -24,8 +21,7 @@ namespace GameScrypt.GSUtils
         }
 
         [System.Obsolete]
-        public static string CorrectLocation(string filepath, string assetsFilePath)
-        {
+        public static string CorrectLocation(string filepath, string assetsFilePath) {
 #if UNITY_ANDROID
             var androidStreamingAssetsPath = "jar:file://" + Application.dataPath + "!/assets/" + assetsFilePath;
             if (!File.Exists(androidStreamingAssetsPath))
@@ -46,8 +42,7 @@ namespace GameScrypt.GSUtils
         }
 
         [System.Obsolete]
-        public static string CopyToFilePath(WWW www, string filepath)
-        {
+        public static string CopyToFilePath(WWW www, string filepath) {
             while (!www.isDone) { }
             // CAREFUL here, for safety reasons you shouldn't let this while loop unattended,
             // place a timer and error check then save to Application.persistentDataPath
@@ -55,8 +50,7 @@ namespace GameScrypt.GSUtils
             return filepath;
         }
 
-        public static string CopyToFilePath(string loadedPath, string filepath)
-        {
+        public static string CopyToFilePath(string loadedPath, string filepath) {
             File.Copy(loadedPath, filepath);
             return filepath;
         }

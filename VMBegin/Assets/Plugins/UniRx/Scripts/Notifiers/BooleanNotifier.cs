@@ -1,21 +1,17 @@
 ﻿using System;
 
-namespace UniRx
-{
+namespace UniRx {
     /// <summary>
     /// Notify boolean flag.
     /// </summary>
-    public class BooleanNotifier : IObservable<bool>
-    {
+    public class BooleanNotifier : IObservable<bool> {
         readonly Subject<bool> boolTrigger = new Subject<bool>();
 
         bool boolValue;
         /// <summary>Current flag value</summary>
-        public bool Value
-        {
+        public bool Value {
             get { return boolValue; }
-            set
-            {
+            set {
                 boolValue = value;
                 boolTrigger.OnNext(value);
             }
@@ -24,18 +20,15 @@ namespace UniRx
         /// <summary>
         /// Setup initial flag.
         /// </summary>
-        public BooleanNotifier(bool initialValue = false)
-        {
+        public BooleanNotifier(bool initialValue = false) {
             this.Value = initialValue;
         }
 
         /// <summary>
         /// Set and raise true if current value isn't true.
         /// </summary>
-        public void TurnOn()
-        {
-            if (Value != true)
-            {
+        public void TurnOn() {
+            if (Value != true) {
                 Value = true;
             }
         }
@@ -43,10 +36,8 @@ namespace UniRx
         /// <summary>
         /// Set and raise false if current value isn't false.
         /// </summary>
-        public void TurnOff()
-        {
-            if (Value != false)
-            {
+        public void TurnOff() {
+            if (Value != false) {
                 Value = false;
             }
         }
@@ -54,8 +45,7 @@ namespace UniRx
         /// <summary>
         /// Set and raise reverse value.
         /// </summary>
-        public void SwitchValue()
-        {
+        public void SwitchValue() {
             Value = !Value;
         }
 
@@ -63,8 +53,7 @@ namespace UniRx
         /// <summary>
         /// Subscribe observer.
         /// </summary>
-        public IDisposable Subscribe(IObserver<bool> observer)
-        {
+        public IDisposable Subscribe(IObserver<bool> observer) {
             return boolTrigger.Subscribe(observer);
         }
     }

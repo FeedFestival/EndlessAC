@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservableSubmitTrigger : ObservableTriggerBase, IEventSystemHandler, ISubmitHandler
-    {
+    public class ObservableSubmitTrigger : ObservableTriggerBase, IEventSystemHandler, ISubmitHandler {
         Subject<BaseEventData> onSubmit;
 
-        void ISubmitHandler.OnSubmit(BaseEventData eventData)
-        {
+        void ISubmitHandler.OnSubmit(BaseEventData eventData) {
             if (onSubmit != null) onSubmit.OnNext(eventData);
         }
 
-        public IObservable<BaseEventData> OnSubmitAsObservable()
-        {
+        public IObservable<BaseEventData> OnSubmitAsObservable() {
             return onSubmit ?? (onSubmit = new Subject<BaseEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onSubmit != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onSubmit != null) {
                 onSubmit.OnCompleted();
             }
         }

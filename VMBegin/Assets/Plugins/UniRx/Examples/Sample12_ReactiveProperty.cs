@@ -5,10 +5,8 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UniRx.Examples
-{
-    public class Sample12_ReactiveProperty : MonoBehaviour
-    {
+namespace UniRx.Examples {
+    public class Sample12_ReactiveProperty : MonoBehaviour {
         // Open Sample12Scene. Set from canvas
         public Button MyButton;
         public Toggle MyToggle;
@@ -21,8 +19,7 @@ namespace UniRx.Examples
 
         Enemy enemy = new Enemy(1000);
 
-        void Start()
-        {
+        void Start() {
             // UnityEvent as Observable
             // (shortcut, MyButton.OnClickAsObservable())
             MyButton.onClick.AsObservable().Subscribe(_ => enemy.CurrentHp.Value -= 99);
@@ -48,8 +45,7 @@ namespace UniRx.Examples
             // from RxProp, CurrentHp changing(Button Click) is observable
             enemy.CurrentHp.SubscribeToText(MyText);
             enemy.IsDead.Where(isDead => isDead == true)
-                .Subscribe(_ =>
-                {
+                .Subscribe(_ => {
                     MyToggle.interactable = MyButton.interactable = false;
                 });
 
@@ -59,14 +55,12 @@ namespace UniRx.Examples
     }
 
     // Reactive Notification Model
-    public class Enemy
-    {
+    public class Enemy {
         public IReactiveProperty<long> CurrentHp { get; private set; }
 
         public IReadOnlyReactiveProperty<bool> IsDead { get; private set; }
 
-        public Enemy(int initialHp)
-        {
+        public Enemy(int initialHp) {
             // Declarative Property
             CurrentHp = new ReactiveProperty<long>(initialHp);
             IsDead = CurrentHp.Select(x => x <= 0).ToReactiveProperty();

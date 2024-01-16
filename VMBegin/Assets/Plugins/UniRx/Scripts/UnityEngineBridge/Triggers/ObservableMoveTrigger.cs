@@ -5,27 +5,21 @@ using System; // require keep for Windows Universal App
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace UniRx.Triggers
-{
+namespace UniRx.Triggers {
     [DisallowMultipleComponent]
-    public class ObservableMoveTrigger : ObservableTriggerBase, IEventSystemHandler, IMoveHandler
-    {
+    public class ObservableMoveTrigger : ObservableTriggerBase, IEventSystemHandler, IMoveHandler {
         Subject<AxisEventData> onMove;
 
-        void IMoveHandler.OnMove(AxisEventData eventData)
-        {
+        void IMoveHandler.OnMove(AxisEventData eventData) {
             if (onMove != null) onMove.OnNext(eventData);
         }
 
-        public IObservable<AxisEventData> OnMoveAsObservable()
-        {
+        public IObservable<AxisEventData> OnMoveAsObservable() {
             return onMove ?? (onMove = new Subject<AxisEventData>());
         }
 
-        protected override void RaiseOnCompletedOnDestroy()
-        {
-            if (onMove != null)
-            {
+        protected override void RaiseOnCompletedOnDestroy() {
+            if (onMove != null) {
                 onMove.OnCompleted();
             }
         }

@@ -1,9 +1,7 @@
 ﻿using System;
 
-namespace UniRx.InternalUtil
-{
-    public class ThreadSafeQueueWorker
-    {
+namespace UniRx.InternalUtil {
+    public class ThreadSafeQueueWorker {
         const int MaxArrayLength = 0X7FEFFFFF;
         const int InitialSize = 16;
 
@@ -18,15 +16,11 @@ namespace UniRx.InternalUtil
         Action<object>[] waitingList = new Action<object>[InitialSize];
         object[] waitingStates = new object[InitialSize];
 
-        public void Enqueue(Action<object> action, object state)
-        {
-            lock (gate)
-            {
-                if (dequing)
-                {
+        public void Enqueue(Action<object> action, object state) {
+            lock (gate) {
+                if (dequing) {
                     // Ensure Capacity
-                    if (waitingList.Length == waitingListCount)
-                    {
+                    if (waitingList.Length == waitingListCount) {
                         var newLength = waitingListCount * 2;
                         if ((uint)newLength > MaxArrayLength) newLength = MaxArrayLength;
 
@@ -40,12 +34,9 @@ namespace UniRx.InternalUtil
                     waitingList[waitingListCount] = action;
                     waitingStates[waitingListCount] = state;
                     waitingListCount++;
-                }
-                else
-                {
+                } else {
                     // Ensure Capacity
-                    if (actionList.Length == actionListCount)
-                    {
+                    if (actionList.Length == actionListCount) {
                         var newLength = actionListCount * 2;
                         if ((uint)newLength > MaxArrayLength) newLength = MaxArrayLength;
 
@@ -63,37 +54,28 @@ namespace UniRx.InternalUtil
             }
         }
 
-        public void ExecuteAll(Action<Exception> unhandledExceptionCallback)
-        {
-            lock (gate)
-            {
+        public void ExecuteAll(Action<Exception> unhandledExceptionCallback) {
+            lock (gate) {
                 if (actionListCount == 0) return;
 
                 dequing = true;
             }
 
-            for (int i = 0; i < actionListCount; i++)
-            {
+            for (int i = 0; i < actionListCount; i++) {
                 var action = actionList[i];
                 var state = actionStates[i];
-                try
-                {
+                try {
                     action(state);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     unhandledExceptionCallback(ex);
-                }
-                finally
-                {
+                } finally {
                     // Clear
                     actionList[i] = null;
                     actionStates[i] = null;
                 }
             }
 
-            lock (gate)
-            {
+            lock (gate) {
                 dequing = false;
 
                 var swapTempActionList = actionList;
