@@ -84,24 +84,18 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Bakery
-# *_final.hdr
-# *_dir.tga
+/Art/**/*.blend1
+/Art/**/*.fbx
+/Art/**/*.obj
+/Art/**/*.mtl
 
-*.blend1
+/VMBegin/Assets/Bakery/
+/VMBegin/Assets/Bakery.meta
 
 /VMBegin/Assets/BakeryLightmaps/
+/VMBegin/Assets/BakeryLightmaps.meta
 /VMBegin/Assets/Game/__Chapters/**/*.hdr
 /VMBegin/Assets/Game/__Chapters/**/*.tga
 
 *.hdr
 *.tga
-
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/env-bakery_dark_final.hdr
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/env-bakery_dark_dir.tga
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/env-bakery_final.hdr
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/env-bakery_dir.tga
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/dark/env-bakery_dark_final.hdr
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/dark/env-bakery_dark_dir.tga
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/light/env-bakery_final.hdr
-# /VMBegin/Assets/Game/__Chapters/begining-tutorial/begining-tutorial/light/env-bakery_dir.tga
