@@ -89,13 +89,22 @@ crashlytics-build.properties
 /Art/**/*.obj
 /Art/**/*.mtl
 
+/VMBegin/Assets/Editor/x64/Bakery/
+/VMBegin/Assets/Editor/x64/Bakery.meta
+
 /VMBegin/Assets/Bakery/
 /VMBegin/Assets/Bakery.meta
 
 /VMBegin/Assets/BakeryLightmaps/
 /VMBegin/Assets/BakeryLightmaps.meta
+/VMBegin/Assets/Game/__Chapters/**/*_probes.asset
+/VMBegin/Assets/Game/__Chapters/**/*_probes.asset.meta
+/VMBegin/Assets/Game/__Chapters/**/*_sky.exr
+/VMBegin/Assets/Game/__Chapters/**/*_sky.exr.meta
 /VMBegin/Assets/Game/__Chapters/**/*.hdr
+/VMBegin/Assets/Game/__Chapters/**/*.hdr.meta
 /VMBegin/Assets/Game/__Chapters/**/*.tga
+/VMBegin/Assets/Game/__Chapters/**/*.tga.meta
 
 *.hdr
 *.tga
