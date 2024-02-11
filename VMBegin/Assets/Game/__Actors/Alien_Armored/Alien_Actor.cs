@@ -6,11 +6,17 @@ namespace Game.Actors {
 
         public Animator Animator { get => _animatorRef; }
 
+        public GameObject go => gameObject;
+
         [SerializeField]
         private Animator _animatorRef;
 
-        void Awake() {
+        public void Init() {
 
+
+            SetActive(false);
         }
+
+        public void SetActive(bool active) => gameObject.SetActive(active);
     }
 }

@@ -33,6 +33,8 @@ public class LightmapChanger : MonoBehaviour {
 
     private LightmapData[] _darkLightmap, _brightLightmap;
 
+    private IEnumerator _waitForLightmapProbes;
+
     public void Setup(bool bright) {
         if (bright) {
 
@@ -69,7 +71,13 @@ public class LightmapChanger : MonoBehaviour {
 
     public void onLightSwitchOff() {
         LightmapSettings.lightmaps = _darkLightmap;
-        LightmapSettings.lightProbes.bakedProbes = _darkLightmapSettings.bakedProbes;
+
+        if (LightmapSettings.lightProbes == null) {
+            _waitForLightmapProbes = waitForLightmapProbes(false);
+            StartCoroutine(_waitForLightmapProbes);
+        } else {
+            changeBakedProbes(false);
+        }
 
         foreach (var tlGroup in _toggleableLightsGroups) {
             tlGroup.ChangeIntensity(false, true);
@@ -78,7 +86,13 @@ public class LightmapChanger : MonoBehaviour {
 
     public void onLightSwitchOn() {
         LightmapSettings.lightmaps = _brightLightmap;
-        LightmapSettings.lightProbes.bakedProbes = _brightLightmapSettings.bakedProbes;
+
+        if (LightmapSettings.lightProbes == null) {
+            _waitForLightmapProbes = waitForLightmapProbes(true);
+            StartCoroutine(_waitForLightmapProbes);
+        } else {
+            changeBakedProbes(true);
+        }
 
         foreach (var tlGroup in _toggleableLightsGroups) {
             tlGroup.ChangeIntensity(true, true);
@@ -88,9 +102,9 @@ public class LightmapChanger : MonoBehaviour {
     private void onFinishedFullRender(object sender, System.EventArgs e) {
 
         if (Bright) {
-            _brightLightmapSettings.bakedProbes = LightmapSettings.lightProbes.bakedProbes;
+            _brightLightmapSettings.SaveBakedProbes("bright/bakedProbes", LightmapSettings.lightProbes.bakedProbes);
         } else {
-            _darkLightmapSettings.bakedProbes = LightmapSettings.lightProbes.bakedProbes;
+            _darkLightmapSettings.SaveBakedProbes("dark/bakedProbes", LightmapSettings.lightProbes.bakedProbes);
         }
 
         Debug.Log("END - IS_BRIGHT: " + Bright + "Application.dataPath: " + Application.dataPath);
@@ -163,5 +177,21 @@ public class LightmapChanger : MonoBehaviour {
         }
 
         return lightMap.ToArray();
+    }
+
+    IEnumerator waitForLightmapProbes(bool bright) {
+
+        if (LightmapSettings.lightProbes == null) {
+            yield return null;
+        }
+
+        changeBakedProbes(bright);
+        StopCoroutine(_waitForLightmapProbes);
+    }
+
+    private void changeBakedProbes(bool bright) {
+        LightmapSettings.lightProbes.bakedProbes = bright
+            ? _brightLightmapSettings.GetBakedProbes("bright/bakedProbes")
+            : _darkLightmapSettings.GetBakedProbes("dark/bakedProbes");
     }
 }

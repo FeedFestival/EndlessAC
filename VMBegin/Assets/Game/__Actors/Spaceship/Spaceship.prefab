@@ -14501,7 +14501,6 @@ GameObject:
   - component: {fileID: 25547807216581598}
   - component: {fileID: 8689167214062962272}
   - component: {fileID: 5032339095722041375}
-  - component: {fileID: 1622027727110642794}
   - component: {fileID: 8462433478774493217}
   m_Layer: 0
   m_Name: Spaceship
@@ -14557,23 +14556,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _signalScannerManager: {fileID: 0}
   _actorRef: {fileID: 3847104838121501065}
---- !u!114 &1622027727110642794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8765074540788190191}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebcae31a82639e542bf6fb8406965810, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _livingAreaT: {fileID: 582247640061247106}
-  _nuclearSunRoom: {fileID: 4907583164894052746}
-  _engine_Thrusters: {fileID: 8464533112059962098}
-  _livingAreaSmall_Thrusters: {fileID: 5476539293660722814}
-  _livingAreaBig_Thrusters: {fileID: 5225413201248360748}
 --- !u!95 &8462433478774493217
 Animator:
   serializedVersion: 5
@@ -15708,6 +15690,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3195715475108434620}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: adec2f4d5f35c5f4a92e78e58f291d83,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4365287225390510507}
     - targetCorrespondingSourceObject: {fileID: 5024274659200025616, guid: adec2f4d5f35c5f4a92e78e58f291d83,
         type: 3}
       insertIndex: -1
@@ -15754,6 +15740,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4365287225390510507
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3847104838121501065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ebcae31a82639e542bf6fb8406965810, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _livingAreaT: {fileID: 582247640061247106}
+  _nuclearSunRoom: {fileID: 4907583164894052746}
+  _engine_Thrusters: {fileID: 8464533112059962098}
+  _livingAreaSmall_Thrusters: {fileID: 5476539293660722814}
+  _livingAreaBig_Thrusters: {fileID: 5225413201248360748}
 --- !u!4 &4478963811786386227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: adec2f4d5f35c5f4a92e78e58f291d83,

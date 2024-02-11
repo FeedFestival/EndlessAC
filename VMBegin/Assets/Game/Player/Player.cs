@@ -21,10 +21,19 @@ namespace Game.Player {
         private GameObject _gameStoryRef;
         private IGameStory _gameStory;
 
+        public object CinemachineBrain { get => _cameraControllerRef.CinemachineBrain; }
+
         void Awake() {
 
             _unitRef = _unitGo.GetComponent<IUnit>();
             _unitGo = null;
+
+            if (_gameStoryRef) {
+                _gameStory = _gameStoryRef.GetComponent<IGameStory>();
+                _gameStoryRef = null;
+            } else {
+                Debug.LogWarning("There is no GameStory on Player");
+            }
 
             __.GameBus.On(GameEvt.GAME_SCENE_LOADED, (object obj) => {
                 var gameScene = obj as IGameScene;
@@ -36,13 +45,6 @@ namespace Game.Player {
 
         void Start() {
             _playerControl = new PlayerControl(_unitRef, _cameraControllerRef, _worldIndicatorManager);
-
-            if (_gameStoryRef) {
-                _gameStory = _gameStoryRef.GetComponent<IGameStory>();
-                _gameStoryRef = null;
-            } else {
-                Debug.LogWarning("There is no GameStory on Player");
-            }
         }
 
         // CONTROL

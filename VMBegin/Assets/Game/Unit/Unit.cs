@@ -25,7 +25,7 @@ namespace Game.Unit {
             var movementTargetTrigger = createMovementTarget(worldIndicatorManager);
 
             Actor = _actorRef.GetComponent<IActor>();
-            //Actor.Ini
+            Actor.Init();
 
             _motorRef = gameObject.GetComponent<Motor>();
             _motorRef?.Init(Actor, movementTargetTrigger);

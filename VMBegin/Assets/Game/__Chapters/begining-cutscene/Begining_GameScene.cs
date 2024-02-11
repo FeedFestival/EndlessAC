@@ -1,8 +1,12 @@
+using Cinemachine;
 using Game.Actors;
 using Game.Scene;
 using Game.Shared.DataModels;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Playables;
+using UnityEngine.SceneManagement;
+using UnityEngine.Timeline;
 
 namespace Game.Chapters.Begining {
     public class Begining_GameScene : GameScene {
@@ -24,6 +28,20 @@ namespace Game.Chapters.Begining {
             var chapter_0 = storyData.chapters["begining"];
 
             if (storyData.progression.currentQuestKey == "the_stop") {
+
+                var cinemachineBrain = _player.CinemachineBrain as CinemachineBrain;
+                Debug.Log("_player: " + cinemachineBrain.ToString());
+
+                var timeline = _beginingCTimeline.playableAsset as TimelineAsset;
+
+                //iterate on all tracks that have a binding
+                foreach (var track in timeline.GetOutputTracks()) {
+                    Debug.Log("track.name: " + track.name);
+                    if (track.name == "Cinemachine Track") {
+                        _beginingCTimeline.SetGenericBinding(track, cinemachineBrain);
+                        break;
+                    }
+                }
 
                 _beginingCTimeline.Play();
             } else {
@@ -68,8 +86,25 @@ namespace Game.Chapters.Begining {
 
         public void BeginingCTimelineStopped() {
             Debug.Log("Timeline Stopped");
+
+            StartCoroutine(loadTutorialScene());
         }
 
+        private IEnumerator loadTutorialScene() {
+
+            var loadSceneParameters = new LoadSceneParameters();
+            loadSceneParameters.loadSceneMode = LoadSceneMode.Additive;
+            loadSceneParameters.localPhysicsMode = LocalPhysicsMode.Physics3D;
+            var scene = SceneManager.LoadScene(2, loadSceneParameters);
+
+            while (!scene.isLoaded) {
+                yield return null;
+            }
+
+            SceneManager.SetActiveScene(scene);
+
+            SceneManager.UnloadSceneAsync(1);
+        }
 
 
 
@@ -82,7 +117,7 @@ namespace Game.Chapters.Begining {
 
         private Spaceship_Actor getSpaceship_Actor() {
             var spaceship = _unitManager.Units["Actor.SpaceShip [201]"];
-            return spaceship.gameObject.GetComponent<Spaceship_Actor>();
+            return spaceship.Actor as Spaceship_Actor;
         }
     }
 }

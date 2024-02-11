@@ -15,6 +15,8 @@ namespace Game.Unit {
             //_unitSignal?.Init(entityId);
             _movementScanner?.Init(entityId, onMovementTargetHit);
             //_wallCheckSignal?.Init(entityId);
+
+            DisableMovementScanner();
         }
 
         internal void DisableMovementScanner() {

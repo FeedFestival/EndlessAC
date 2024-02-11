@@ -20,7 +20,8 @@ public class GameScene_BeginingTutorial : MonoBehaviour {
 
         _lightmapChanger.SetupDifferentLightmaps(_darkLightmapDir, _darkLightmapColor, _brightLightmapDir, _brightLightmapColor);
 
-       _isLightswitchOn = false;
+        _isLightswitchOn = false;
+
         ToggleLightswtich();
     }
 
@@ -34,6 +35,4 @@ public class GameScene_BeginingTutorial : MonoBehaviour {
 
         _isLightswitchOn = !_isLightswitchOn;
     }
-
-    
 }

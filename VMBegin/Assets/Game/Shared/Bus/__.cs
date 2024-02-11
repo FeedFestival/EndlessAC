@@ -22,6 +22,7 @@ namespace Game.Shared.Bus {
 
         public static void ClearAll() {
             _gameBus = null;
+            _bus = null;
         }
     }
 }

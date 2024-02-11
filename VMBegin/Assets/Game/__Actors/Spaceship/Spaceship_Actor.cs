@@ -6,6 +6,7 @@ namespace Game.Actors {
     public class Spaceship_Actor : MonoBehaviour, IActor {
 
         public Animator Animator { get => null; }
+        public GameObject go => gameObject;
 
         [SerializeField]
         private Transform _livingAreaT;
@@ -46,10 +47,16 @@ namespace Game.Actors {
 
         void Start() {
 
+            Init();
+        }
+
+        public void Init() {
             StopEngine(instant: true);
             StopNuclear(instant: true);
             StopRotationEngine(instant: true);
         }
+
+        public void SetActive(bool active) => gameObject.SetActive(active);
 
         public void StartRotateLivingArea() {
             _rotateLivingAreaTweener.Kill();

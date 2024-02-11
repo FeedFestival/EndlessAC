@@ -1,3 +1,4 @@
+using Cinemachine;
 using DG.Tweening;
 using GameScrypt.GSUtils;
 using System;
@@ -14,10 +15,14 @@ namespace Game.Player {
         Action<Vector3> _emitMovementTarget;
         Vector2Int _centerScreen;
 
+        public CinemachineBrain CinemachineBrain;
+
         internal void Init(Action<Vector3> emitMovementTarget) {
             _centerScreen = new Vector2Int(Screen.width / 2, Screen.height / 2);
 
             _emitMovementTarget = emitMovementTarget;
+
+            CinemachineBrain = gameObject.GetComponent<CinemachineBrain>();
         }
 
         private void Update() {

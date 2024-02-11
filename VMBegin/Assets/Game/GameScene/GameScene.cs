@@ -14,12 +14,11 @@ namespace Game.Scene {
         }
 
         protected virtual void Start() {
-            Debug.Log("GameScene  -> Start");
+            Debug.Log("GameScene  -> Start -> GameEvt.GAME_SCENE_LOADED");
 
             _unitManager.Init();
 
             __.GameBus.Emit(GameEvt.GAME_SCENE_LOADED, this);
-            Debug.Log("after emit -> GameEvt.GAME_SCENE_LOADED");
         }
 
         public void SetPlayer(IPlayer player) {

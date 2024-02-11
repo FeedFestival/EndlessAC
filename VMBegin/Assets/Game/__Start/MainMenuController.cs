@@ -11,6 +11,8 @@ using UnityEngine.UI;
 namespace Game.Start {
     public class MainMenuController : MonoBehaviour {
 
+        public Action StartGame;
+
         [SerializeField]
         private Button _startButton;
 
@@ -21,9 +23,7 @@ namespace Game.Start {
         private Button _quitButton;
 
         internal void Init() {
-            _startButton.onClick.AddListener(() => {
-                SceneManager.LoadScene(1);
-            });
+            _startButton.onClick.AddListener(() => StartGame?.Invoke());
 
             _optionsButton.onClick.AddListener(() => {
                 Debug.Log("Go To Options -> ");
