@@ -25,10 +25,10 @@ public class ToggleableLightsGroup : MonoBehaviour
                 bakeryLightMesh.gameObject.SetActive(bright);
             }  else {
                 bakeryLightMesh.intensity = intensity;
-                var lightMeshInspector = Editor.CreateEditor(bakeryLightMesh) as ftLightMeshInspector;
-                if (lightMeshInspector != null) {
-                    lightMeshInspector.SyncMaterialAndLight();
-                }
+                //var lightMeshInspector = Editor.CreateEditor(bakeryLightMesh) as ftLightMeshInspector;
+                //if (lightMeshInspector != null) {
+                //    lightMeshInspector.SyncMaterialAndLight();
+                //}
             }
         }
     }

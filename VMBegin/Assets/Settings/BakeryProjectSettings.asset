@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05ce0574111032a418688d5d3961cb09, type: 3}
   m_Name: BakeryProjectSettings
   m_EditorClassIdentifier: 
-  mipmapLightmaps: 1
+  mipmapLightmaps: 0
   format8bit: 0
   formatHDR: 0
-  lightmapCompression: 2
+  lightmapCompression: 0
   maxAssetMip: 100
   dirHighQuality: 1
   texelPaddingForDefaultAtlasPacker: 3
   texelPaddingForXatlasAtlasPacker: 1
   alphaMetaPassResolutionMultiplier: 2
   volumeRenderMode: 1000
-  deletePreviousLightmapsBeforeBake: 1
+  deletePreviousLightmapsBeforeBake: 0
   logLevel: 3
   alternativeScaleInLightmap: 0
   alignToTextureBlocksWithXatlas: 1

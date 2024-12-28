@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dc2871a978582d4688e3de872dbcd87, type: 3}
   m_Name: BasePrefabs
   m_EditorClassIdentifier: 
+  _movementTargetSignal: {fileID: 6655714032221748242, guid: 23540a7be23558c4ab78c5cb3f59554b,
+    type: 3}
   MovementTargetSignal: {fileID: 6655714032221748242, guid: 23540a7be23558c4ab78c5cb3f59554b,
     type: 3}

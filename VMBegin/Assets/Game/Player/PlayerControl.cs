@@ -1,6 +1,7 @@
 using Game.Shared.Interfaces;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using _ = Game.Main;
 
 namespace Game.Player {
     public class PlayerControl {
@@ -13,7 +14,7 @@ namespace Game.Player {
             _unitRef = unitRef;
             _cameraControllerRef = cameraControllerRef;
 
-            _unitRef.Init(worldIndicatorManager);
+            _unitRef.Init(_.Main._.BasePrefabs, worldIndicatorManager);
             _cameraControllerRef.Init(emitMovementTarget);
 
             _input = new InputManager();

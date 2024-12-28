@@ -316,10 +316,8 @@ namespace Game.Unit {
         }
 
         void setAnimatorFloats(float speed, float motionSpeed = 1) {
-            //if (_hasAnimator) {
             _actor.Animator.SetFloat(_animIDSpeed, speed);
             _actor.Animator.SetFloat(_animIDMotionSpeed, motionSpeed);
-            //}
         }
 
         void OnDestroy() {

@@ -32,6 +32,7 @@ namespace Game.Start {
             OnDependenciesLoaded -= onDependenciesLoaded;
 
             StopCoroutine(_loadScene);
+
             _mainMenuController.Init();
             Debug.Log("_mainMenuController.Init(); -> ");
             _mainMenuController.StartGame += () => {

@@ -1,6 +1,5 @@
 using Game.Shared.Interfaces;
 using UnityEngine;
-using _ = Game.Main;
 
 namespace Game.Unit {
     public class Unit : UnitBase, IUnit {
@@ -17,12 +16,12 @@ namespace Game.Unit {
 
         public IActor Actor { get; private set; }
 
-        public void Init(IWorldIndicatorManager worldIndicatorManager = null) {
+        public void Init(IBasePrefabs basePrefabs, IWorldIndicatorManager worldIndicatorManager = null) {
 
             var entityId = gameObject.GetComponent<IEntityId>();
             ID = entityId.CalculateId();
 
-            var movementTargetTrigger = createMovementTarget(worldIndicatorManager);
+            var movementTargetTrigger = createMovementTarget(basePrefabs.MovementTargetSignal, worldIndicatorManager);
 
             Actor = _actorRef.GetComponent<IActor>();
             Actor.Init();
@@ -55,8 +54,8 @@ namespace Game.Unit {
             _motorRef.MoveTargetReached();
         }
 
-        ITrigger createMovementTarget(IWorldIndicatorManager worldIndicatorManager = null) {
-            var go = Instantiate(_.Main._.BasePrefabs.MovementTargetSignal);
+        ITrigger createMovementTarget(GameObject movementTargetSignal, IWorldIndicatorManager worldIndicatorManager = null) {
+            var go = Instantiate(movementTargetSignal); // _.Main._.BasePrefabs.MovementTargetSignal
 
             if (worldIndicatorManager != null) {
                 go.transform.SetParent(worldIndicatorManager.transform);

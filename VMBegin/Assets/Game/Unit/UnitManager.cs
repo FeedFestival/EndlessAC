@@ -7,13 +7,13 @@ namespace Game.Unit {
         public Dictionary<string, IUnit> Units { get; set; }
         private Dictionary<int, string> _unitsNames;
 
-        public void Init() {
+        public void Init(IBasePrefabs basePrefabs) {
             Units = new Dictionary<string, IUnit>();
             _unitsNames = new Dictionary<int, string>();
 
             foreach (Transform ct in transform) {
                 var unit = ct.GetComponent<IUnit>();
-                unit?.Init();
+                unit?.Init(basePrefabs);
                 Units.Add(unit.Name, unit);
                 _unitsNames.Add(unit.ID, unit.Name);
             }

@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+using Game.Scene;
 using UnityEngine;
 
-public class GameScene_BeginingTutorial : MonoBehaviour {
+public class GameScene_BeginingTutorial : GameScene {
     [SerializeField]
     private Texture2D[] _darkLightmapDir, _darkLightmapColor;
     [SerializeField]
@@ -16,7 +14,8 @@ public class GameScene_BeginingTutorial : MonoBehaviour {
 
     private bool _isLightswitchOn;
 
-    private void Start() {
+    // This is called from Player when everything is ready
+    public override void StartScene() {
 
         _lightmapChanger.SetupDifferentLightmaps(_darkLightmapDir, _darkLightmapColor, _brightLightmapDir, _brightLightmapColor);
 

@@ -10,18 +10,15 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
-/VMBegin/[Ll]ibrary/
-/VMBegin/[Tt]emp/
-/VMBegin/[Oo]bj/
-/VMBegin/[Bb]uild/
-/VMBegin/[Bb]uilds/
-/VMBegin/[Ll]ogs/
-/VMBegin/[Uu]ser[Ss]ettings/
-/VMBegin/[Dd]ist/
-/VMBegin/[Aa]ssets/TextMesh Pro/
-
-/VMBegin/Library/
-/VMBegin/dist/
+/*/[Ll]ibrary/
+/*/[Tt]emp/
+/*/[Oo]bj/
+/*/[Bb]uild/
+/*/[Bb]uilds/
+/*/[Ll]ogs/
+/*/[Uu]ser[Ss]ettings/
+/*/[Dd]ist/
+/*/[Aa]ssets/TextMesh Pro/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
@@ -89,22 +86,22 @@ crashlytics-build.properties
 /Art/**/*.obj
 /Art/**/*.mtl
 
-/VMBegin/Assets/Editor/x64/Bakery/
-/VMBegin/Assets/Editor/x64/Bakery.meta
+/*/Assets/Editor/x64/Bakery/
+/*/Assets/Editor/x64/Bakery.meta
 
-/VMBegin/Assets/Bakery/
-/VMBegin/Assets/Bakery.meta
+/*/Assets/Bakery/
+/*/Assets/Bakery.meta
 
-/VMBegin/Assets/BakeryLightmaps/
-/VMBegin/Assets/BakeryLightmaps.meta
-/VMBegin/Assets/Game/__Chapters/**/*_probes.asset
-/VMBegin/Assets/Game/__Chapters/**/*_probes.asset.meta
-/VMBegin/Assets/Game/__Chapters/**/*_sky.exr
-/VMBegin/Assets/Game/__Chapters/**/*_sky.exr.meta
-/VMBegin/Assets/Game/__Chapters/**/*.hdr
-/VMBegin/Assets/Game/__Chapters/**/*.hdr.meta
-/VMBegin/Assets/Game/__Chapters/**/*.tga
-/VMBegin/Assets/Game/__Chapters/**/*.tga.meta
+/*/Assets/BakeryLightmaps/
+/*/Assets/BakeryLightmaps.meta
+/*/Assets/Game/__Chapters/**/*_probes.asset
+/*/Assets/Game/__Chapters/**/*_probes.asset.meta
+/*/Assets/Game/__Chapters/**/*_sky.exr
+/*/Assets/Game/__Chapters/**/*_sky.exr.meta
+/*/Assets/Game/__Chapters/**/*.hdr
+/*/Assets/Game/__Chapters/**/*.hdr.meta
+/*/Assets/Game/__Chapters/**/*.tga
+/*/Assets/Game/__Chapters/**/*.tga.meta
 
 *.hdr
 *.tga
